@@ -1,12 +1,13 @@
-query ($range: RangeInput) {
+query GetDaysData($range: RangeInput) {
 	Transactions(range: $range) {
 		id
 		item
+		amount
+		date
 		category {
 			id
 			name
 		}
-		date
-		amount
 	}
+	Total(range: $range)
 }

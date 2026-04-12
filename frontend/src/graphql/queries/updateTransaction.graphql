@@ -1,4 +1,4 @@
-mutation ($id: ID!, $input: UpdateTransactionInput!) {
+mutation UpdateTransaction($id: ID!, $input: UpdateTransactionInput!) {
 	updateTransaction(id: $id, input: $input) {
 		id
 		item

@@ -1,4 +1,4 @@
-query ($range: RangeInput) {
+query GetCategories($range: RangeInput) {
 	Categories(range: $range) {
 		id
 		name

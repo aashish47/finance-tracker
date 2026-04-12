@@ -1,0 +1,3 @@
+query GetLastDate {
+	LastDate
+}

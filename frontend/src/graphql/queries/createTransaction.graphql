@@ -1,4 +1,4 @@
-mutation ($input: TransactionInput!) {
+mutation CreateTransaction($input: TransactionInput!) {
 	createTransaction(input: $input) {
 		id
 		item

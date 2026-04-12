@@ -1,4 +1,4 @@
-query ($year: Int!, $range: RangeInput) {
+query GetYearlyData($year: Int!, $range: RangeInput) {
 	TransactionsByMonth(year: $year) {
 		total
 		categories {

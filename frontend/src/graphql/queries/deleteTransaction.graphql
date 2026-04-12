@@ -1,4 +1,4 @@
-mutation ($id: ID!) {
+mutation DeleteTransaction($id: ID!) {
 	deleteTransaction(id: $id) {
 		id
 		item

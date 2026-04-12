@@ -1,16 +1,14 @@
 "use server";
 
-import createTransactionMutation from "@/graphql/createTransaction.graphql";
-import deleteTransactionMutation from "@/graphql/deleteTransaction.graphql";
-import getDaysDataQuery from "@/graphql/getDaysData.graphql";
-import getLastDateQuery from "@/graphql/getLastDate.graphql";
-import getYearlyDataQuery from "@/graphql/getYearlyData.graphql";
-import updateTransactionMutation from "@/graphql/updateTransaction.graphql";
-import { request } from "@/lib/request";
-import { Provider } from "@supabase/supabase-js";
-import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
-
+import {
+	CreateTransactionDocument,
+	DeleteTransactionDocument,
+	GetDaysDataDocument,
+	GetLastDateDocument,
+	GetYearlyDataDocument,
+	UpdateTransactionDocument,
+} from "@/graphql/generated/graphql";
+import { fetcher } from "@/lib/fetcher";
 import {
 	CreateTransactionVariables,
 	DaysDataQueryResponse,
@@ -26,25 +24,28 @@ import {
 import { getRange } from "@/utils/getRange";
 import { getUser } from "@/utils/getUser";
 import { createClient } from "@/utils/supabase/server";
+import { Provider } from "@supabase/supabase-js";
 import { format } from "date-fns";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
+import { redirect } from "next/navigation";
 
 export const getDaysData = async (date: string) => {
 	const variables: DaysDataQueryVariables = {
 		range: { startDate: date, endDate: date },
 	};
 	const { id } = await getUser();
-	const { Transactions, Total }: DaysDataQueryResponse = await request(
-		getDaysDataQuery,
+	const { Transactions, Total }: DaysDataQueryResponse = await fetcher(
+		GetDaysDataDocument.toString(),
 		variables,
-		"force-cache",
-		[`${id}-${date}`],
+		`${id}-${date}`,
 	);
 	return { Transactions, Total };
 };
 
 export const getLastDate = async () => {
-	const { LastDate }: LastDateQueryResponse = await request(getLastDateQuery);
+	const { LastDate }: LastDateQueryResponse = await fetcher(
+		GetLastDateDocument.toString(),
+	);
 
 	return LastDate;
 };
@@ -58,9 +59,11 @@ export const getYearlyData = async (selectedYear: number) => {
 	const { id } = await getUser();
 
 	const { TransactionsByMonth, Categories, Years }: YearlsDataQueryResponse =
-		await request(getYearlyDataQuery, variables, "force-cache", [
+		await fetcher(
+			GetYearlyDataDocument.toString(),
+			variables,
 			`${id}-${selectedYear}`,
-		]);
+		);
 
 	return { TransactionsByMonth, Categories, Years };
 };
@@ -68,15 +71,15 @@ export const getYearlyData = async (selectedYear: number) => {
 export const createTransaction = async (
 	variables: CreateTransactionVariables,
 ) => {
-	await request(createTransactionMutation, variables);
+	await fetcher(CreateTransactionDocument.toString(), variables);
 
 	const {
 		input: { date },
 	} = variables;
 
 	const { id } = await getUser();
-	revalidateTag(`${id}-${format(date, "yyyy-MM-dd")}`);
-	revalidateTag(`${id}-${format(date, "yyyy")}`);
+	updateTag(`${id}-${format(date, "yyyy-MM-dd")}`);
+	updateTag(`${id}-${format(date, "yyyy")}`);
 	return { error: null };
 };
 
@@ -86,8 +89,8 @@ export const updateTransactions = async (
 ) => {
 	const {
 		updateTransaction: { date },
-	}: UpdateTransactionResponse = await request(
-		updateTransactionMutation,
+	}: UpdateTransactionResponse = await fetcher(
+		UpdateTransactionDocument.toString(),
 		variables,
 	);
 	console.log(oldDate);
@@ -95,11 +98,11 @@ export const updateTransactions = async (
 	const oldYear = format(oldDate, "yyyy");
 	const { id } = await getUser();
 
-	revalidateTag(`${id}-${newYear}`);
-	revalidateTag(`${id}-${format(date, "yyyy-MM-dd")}`);
+	updateTag(`${id}-${newYear}`);
+	updateTag(`${id}-${format(date, "yyyy-MM-dd")}`);
 	if (oldYear !== newYear) {
-		revalidateTag(`${id}-${oldYear}`);
-		revalidateTag(`${id}-${format(oldDate, "yyyy-MM-dd")}`);
+		updateTag(`${id}-${oldYear}`);
+		updateTag(`${id}-${format(oldDate, "yyyy-MM-dd")}`);
 	}
 	return { error: null };
 };
@@ -109,14 +112,14 @@ export const deleteTransaction = async (
 ) => {
 	const {
 		deleteTransaction: { date },
-	}: DeleteTransactionResponse = await request(
-		deleteTransactionMutation,
+	}: DeleteTransactionResponse = await fetcher(
+		DeleteTransactionDocument.toString(),
 		variables,
 	);
 
 	const { id } = await getUser();
-	revalidateTag(`${id}-${format(date, "yyyy")}`);
-	revalidateTag(`${id}-${format(date, "yyyy-MM-dd")}`);
+	updateTag(`${id}-${format(date, "yyyy")}`);
+	updateTag(`${id}-${format(date, "yyyy-MM-dd")}`);
 
 	return { error: null };
 };
