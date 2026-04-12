@@ -21,22 +21,24 @@ const DayData = ({
 
 	return (
 		<div className="flex h-full flex-col gap-2">
-			<CalendarClient
-				selectedYear={selectedYear}
-				selectedCategory={selectedCategory}
-				selectedMonth={selectedMonth}
-				selectedDate={selectedDate}
-				selectedTab={selectedTab}
-			/>
-			<div className="flex-grow rounded-md border p-3">
+			<div className="rounded-md border">
+				<CalendarClient
+					selectedYear={selectedYear}
+					selectedCategory={selectedCategory}
+					selectedMonth={selectedMonth}
+					selectedDate={selectedDate}
+					selectedTab={selectedTab}
+				/>
+			</div>
+			<div className="grow rounded-md border p-2">
 				<div className="flex h-full flex-col justify-between">
-					<div className="hidden text-center text-sm text-muted-foreground md:block">
+					<div className="text-muted-foreground text-center text-sm">
 						Summary
 					</div>
 					<div className="text-center text-5xl font-semibold">
 						{formatCurrency(total)}
 					</div>
-					<div className="text-center text-muted-foreground">
+					<div className="text-muted-foreground text-center">
 						{transactions.length > 0
 							? `Biggest Spend: ${capitalize(transactions[0].item)} ${formatCurrency(transactions[0].amount)}`
 							: "No Transactions"}

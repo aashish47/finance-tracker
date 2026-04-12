@@ -14,7 +14,6 @@ const CalendarClient = ({
 	selectedDate,
 }: UrlProps) => {
 	const router = useRouter();
-	console.log(selectedDate);
 	return (
 		<Calendar
 			id="calendar"
@@ -34,7 +33,7 @@ const CalendarClient = ({
 				}
 			}}
 			disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
-			className="rounded-md border"
+			className="w-full bg-transparent"
 		/>
 	);
 };

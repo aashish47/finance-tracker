@@ -39,11 +39,11 @@ const CategorySelect = <
 		<FormItem>
 			<Select value={field.value?.toString()} onValueChange={field.onChange}>
 				<FormControl>
-					<SelectTrigger>
+					<SelectTrigger className="w-full">
 						<SelectValue placeholder="Category" />
 					</SelectTrigger>
 				</FormControl>
-				<SelectContent className="h-[40vh]">
+				<SelectContent position="popper" align="start" className="h-[40vh]">
 					{categories.map((category) => (
 						<SelectItem key={category.id} value={category.id.toString()}>
 							{category.name}

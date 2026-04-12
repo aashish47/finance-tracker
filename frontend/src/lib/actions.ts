@@ -93,17 +93,16 @@ export const updateTransactions = async (
 		UpdateTransactionDocument.toString(),
 		variables,
 	);
-	console.log(oldDate);
+
 	const newYear = format(date, "yyyy");
 	const oldYear = format(oldDate, "yyyy");
 	const { id } = await getUser();
 
 	updateTag(`${id}-${newYear}`);
 	updateTag(`${id}-${format(date, "yyyy-MM-dd")}`);
-	if (oldYear !== newYear) {
-		updateTag(`${id}-${oldYear}`);
-		updateTag(`${id}-${format(oldDate, "yyyy-MM-dd")}`);
-	}
+	updateTag(`${id}-${oldYear}`);
+	updateTag(`${id}-${format(oldDate, "yyyy-MM-dd")}`);
+
 	return { error: null };
 };
 

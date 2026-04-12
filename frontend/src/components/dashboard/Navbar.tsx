@@ -47,10 +47,10 @@ const Navbar = ({
 					}}
 					value={selectedYear.toString()}
 				>
-					<SelectTrigger className="w-24">
+					<SelectTrigger className="">
 						<SelectValue placeholder="Select Year" />
 					</SelectTrigger>
-					<SelectContent>
+					<SelectContent position="popper" align="start">
 						{data &&
 							data.map((year: number) => (
 								<SelectItem key={year} value={year.toString()}>

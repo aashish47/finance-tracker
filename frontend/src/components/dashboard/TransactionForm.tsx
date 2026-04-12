@@ -40,6 +40,7 @@ const TransactionForm = ({ data: categories }: TransactionFormProps) => {
 
 	const handleSubmit = async (data: {
 		item: string;
+		e;
 		category: string;
 		amount: string;
 		date: Date;
