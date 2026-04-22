@@ -6,9 +6,8 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import { UrlProps } from "@/types/types";
-import { buildUrl } from "@/utils/buildUrl";
-import { cn } from "@/utils/conditional";
+import { cn } from "@/lib/utils";
+import { buildUrl, UrlProps } from "@/utils/buildUrl";
 import { useRouter } from "next/navigation";
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from "recharts";
 
@@ -19,18 +18,12 @@ interface BarGraphProps {
 	}[];
 }
 
-const BarGraph = ({
-	selectedMonth,
-	selectedYear,
-	selectedCategory,
-	selectedDate,
-	monthlySummary,
-}: BarGraphProps & UrlProps) => {
+const BarGraph = (props: BarGraphProps & UrlProps) => {
 	// console.log(`BarGraph rendered at: ${new Date().toLocaleTimeString()}`);
+	const { monthlySummary, month, ...rest } = props;
 	const router = useRouter();
-
 	const chartConfig = { amount: { label: "Amount" } } satisfies ChartConfig;
-	const chartColor = "hsl(var(--primary))";
+	const chartColor = "var(--primary)";
 
 	return (
 		<ChartContainer config={chartConfig} className="h-full w-full">
@@ -49,24 +42,21 @@ const BarGraph = ({
 				/>
 				<Bar
 					onClick={(_, index) => {
-						selectedMonth = selectedMonth !== index ? index : undefined;
 						const url = buildUrl({
-							selectedYear,
-							selectedMonth,
-							selectedCategory,
-							selectedDate,
+							month: month === index ? undefined : index,
+							...rest,
 						});
 						router.push(url);
 					}}
-					activeIndex={selectedMonth}
-					className="hover:cursor-pointer"
+					activeIndex={month}
 					activeBar={({ ...props }) => {
 						return (
 							<Rectangle
 								{...props}
 								className={cn(
-									props.index === selectedMonth &&
-										"fill-chart-4 drop-shadow-[0_0_5px_hsl(var(--chart-4))]",
+									month !== undefined &&
+										props.index === month &&
+										"drop-shadow-[0_0_5px_var(--chart-4)]",
 								)}
 							/>
 						);

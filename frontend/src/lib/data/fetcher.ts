@@ -1,21 +1,17 @@
-// "use cache";
+"use cache";
 
-import { createClient } from "@/utils/supabase/server";
+import { cacheTag } from "next/cache";
 
 export async function fetcher<T>(
 	query: string,
-	variables?: any,
+	variables?: unknown,
 	cacheKey?: string,
+	accessToken?: string,
 ): Promise<T> {
-	// cacheLife("max");
-	// if (cacheKey) {
-	// 	cacheTag(cacheKey);
-	// }
+	if (cacheKey) {
+		cacheTag(cacheKey);
+	}
 
-	const supabase = await createClient();
-
-	const accessToken = (await supabase.auth.getSession()).data.session
-		?.access_token;
 	if (!accessToken) {
 		throw new Error("missing access token");
 	}

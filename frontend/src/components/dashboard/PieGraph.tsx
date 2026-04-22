@@ -7,63 +7,55 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import { UrlProps } from "@/types/types";
-import { buildUrl } from "@/utils/buildUrl";
+import { buildUrl, UrlProps } from "@/utils/buildUrl";
 import { useRouter } from "next/navigation";
 import { Label, Legend, Pie, PieChart, Sector } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";
 
-interface DataType {
+export interface CategoryTotalsForPie {
 	category: string;
 	amount: number;
 	fill: string;
 }
 
 interface PieGraphProps {
-	data: DataType[];
-	total?: number;
 	activeIndex: number;
+	data: CategoryTotalsForPie[];
+	total?: number;
 }
 
-const PieGraph = ({
-	data,
-	total,
-	activeIndex,
-	selectedCategory,
-	selectedMonth,
-	selectedYear,
-	selectedDate,
-}: PieGraphProps & UrlProps) => {
+const COLORS = {
+	Grocery: "#e6194B",
+	Education: "#f58231",
+	Health: "#ffe119",
+	Miscellaneous: "#bfef45",
+	Food: "#3cb44b",
+	Transportation: "#42d4f4",
+	Personal: "#4363d8",
+	Entertainment: "#911eb4",
+	Tax: "#f032e6",
+	Utility: "#fabed4",
+	Rent: "#fffac8",
+	Debt: "#ffd8b1",
+	Gift: "#aaffc3",
+	Insurance: "#469990",
+	Electronics: "#775ced",
+	Repair: "#ffffff",
+};
+
+const PieGraph = (props: PieGraphProps & UrlProps) => {
 	// console.log(`PieGraph rendered at: ${new Date().toLocaleTimeString()}`);
-	const COLORS = [
-		"#e6194B",
-		"#f58231",
-		"#ffe119",
-		"#bfef45",
-		"#3cb44b",
-		"#42d4f4",
-		"#4363d8",
-		"#911eb4",
-		"#f032e6",
-		"#fabed4",
-		"#ffd8b1",
-		"#fffac8",
-		"#aaffc3",
-		"#469990",
-		"#775ced",
-		"#ffffff",
-	];
+	const { activeIndex, data, total, category, ...rest } = props;
 
 	const chartConfig = data.reduce(
 		(
 			acc: Record<string, Record<string, string>>,
-			data: DataType,
-			index: number,
+			data: CategoryTotalsForPie,
 		) => {
-			const category = data.category;
+			const category = data.category as keyof typeof COLORS;
 			acc[category] = {
 				label: category,
-				color: COLORS[index % COLORS.length],
+				color: COLORS[category],
 			};
 			return acc;
 		},
@@ -91,18 +83,14 @@ const PieGraph = ({
 				/>
 				<Pie
 					onClick={(_, index) => {
-						const categoryID = data[index]?.category;
-						selectedCategory =
-							selectedCategory !== categoryID ? categoryID : undefined;
+						const selectedCategory = data[index]?.category;
 						const url = buildUrl({
-							selectedYear,
-							selectedMonth,
-							selectedCategory,
-							selectedDate,
+							category:
+								category !== selectedCategory ? selectedCategory : undefined,
+							...rest,
 						});
 						router.push(url);
 					}}
-					className="hover:cursor-pointer"
 					activeIndex={activeIndex}
 					data={data}
 					dataKey="amount"
@@ -114,41 +102,43 @@ const PieGraph = ({
 								{...props}
 								outerRadius={outerRadius + 10}
 								style={{
-									filter: `drop-shadow(0px 0px 5px ${props.fill}`,
+									filter: `drop-shadow(0px 0px 5px ${props.fill})`,
 								}}
 							/>
 						);
 					}}
 				>
-					<Label
-						content={({ viewBox }) => {
-							if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-								return (
-									<text
-										x={viewBox.cx}
-										y={viewBox.cy}
-										textAnchor="middle"
-										dominantBaseline="middle"
-									>
-										<tspan
+					{total !== undefined && (
+						<Label
+							content={({ viewBox }) => {
+								if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+									return (
+										<text
 											x={viewBox.cx}
 											y={viewBox.cy}
-											className="fill-foreground text-2xl font-bold"
+											textAnchor="middle"
+											dominantBaseline="middle"
 										>
-											{total}
-										</tspan>
-										<tspan
-											x={viewBox.cx}
-											y={(viewBox.cy || 0) + 24}
-											className="fill-muted-foreground"
-										>
-											Total
-										</tspan>
-									</text>
-								);
-							}
-						}}
-					/>
+											<tspan
+												x={viewBox.cx}
+												y={viewBox.cy}
+												className="fill-foreground text-2xl font-bold"
+											>
+												{total}
+											</tspan>
+											<tspan
+												x={viewBox.cx}
+												y={(viewBox.cy || 0) + 24}
+												className="fill-muted-foreground"
+											>
+												Total
+											</tspan>
+										</text>
+									);
+								}
+							}}
+						/>
+					)}
 				</Pie>
 			</PieChart>
 		</ChartContainer>

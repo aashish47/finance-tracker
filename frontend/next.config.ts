@@ -1,7 +1,12 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import type { NextConfig } from "next";
+const nextConfig: NextConfig = {
 	cacheComponents: true,
-	reactCompiler: true,
+	reactCompiler: false, //table and form were having state issues
+	logging: {
+		fetches: {
+			fullUrl: true,
+		},
+	},
 	images: {
 		remotePatterns: [
 			{

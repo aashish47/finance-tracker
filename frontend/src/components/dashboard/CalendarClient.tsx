@@ -1,33 +1,23 @@
 "use client";
 
 import { Calendar } from "@/components/ui/calendar";
-import { UrlProps } from "@/types/types";
-import { buildUrl } from "@/utils/buildUrl";
+import { buildUrl, UrlProps } from "@/utils/buildUrl";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 
-const CalendarClient = ({
-	selectedYear,
-	selectedMonth,
-	selectedCategory,
-	selectedTab,
-	selectedDate,
-}: UrlProps) => {
+const CalendarClient = (props: UrlProps) => {
+	const { date, ...rest } = props;
 	const router = useRouter();
 	return (
 		<Calendar
 			id="calendar"
 			mode="single"
-			selected={new Date(selectedDate)}
+			selected={new Date(date)}
 			onSelect={(date) => {
 				if (date) {
-					selectedDate = format(date, "yyyy-MM-dd");
 					const url = buildUrl({
-						selectedYear,
-						selectedMonth,
-						selectedCategory,
-						selectedTab,
-						selectedDate,
+						date: format(date, "yyyy-MM-dd"),
+						...rest,
 					});
 					router.push(url);
 				}

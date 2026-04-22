@@ -1,8 +1,5 @@
-"use client";
-
 import EditForm from "@/components/dashboard/transactions/EditForm";
 import { Button } from "@/components/ui/button";
-
 import {
 	Dialog,
 	DialogContent,
@@ -20,8 +17,8 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Query, Transaction } from "@/graphql/generated/graphql";
 import { deleteTransaction, updateTransactions } from "@/lib/actions";
-import { Category, Transaction } from "@/types/types";
 import { Row } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { MoreHorizontal } from "lucide-react";
@@ -29,7 +26,7 @@ import { useState } from "react";
 
 interface CellProps<TData> {
 	row: Row<TData>;
-	categories: Category[];
+	categories: Query["Categories"];
 }
 
 const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
@@ -37,7 +34,7 @@ const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 
 	const handleSubmit = async (data: {
 		item: string;
-		category: string;
+		categoryID: string;
 		amount: number;
 		date: Date;
 	}) => {
@@ -47,7 +44,7 @@ const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 				id: transaction.id,
 				input: {
 					item: data.item,
-					categoryID: data.category,
+					categoryID: data.categoryID,
 					amount: Number(data.amount),
 					date: format(data.date, "yyyy-MM-dd"),
 				},
@@ -110,7 +107,7 @@ const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 						</DialogDescription>
 					</DialogHeader>
 					<EditForm
-						{...transaction}
+						transaction={transaction}
 						handleSubmit={handleSubmit}
 						categories={categories}
 					>

@@ -18,11 +18,11 @@ type Documents = {
     "mutation CreateTransaction($input: TransactionInput!) {\n  createTransaction(input: $input) {\n    id\n    item\n    date\n    amount\n    category {\n      id\n      name\n    }\n  }\n}": typeof types.CreateTransactionDocument,
     "mutation DeleteTransaction($id: ID!) {\n  deleteTransaction(id: $id) {\n    id\n    item\n    date\n    amount\n    category {\n      id\n      name\n    }\n  }\n}": typeof types.DeleteTransactionDocument,
     "query GetCategories($range: RangeInput) {\n  Categories(range: $range) {\n    id\n    name\n  }\n}": typeof types.GetCategoriesDocument,
+    "query GetCategoryTotals($year: Int!, $month: Int, $search: String) {\n  GetCategoryTotals(year: $year, month: $month, search: $search) {\n    category\n    total\n    count\n  }\n}": typeof types.GetCategoryTotalsDocument,
     "query GetDaysData($range: RangeInput) {\n  Transactions(range: $range) {\n    id\n    item\n    amount\n    date\n    category {\n      id\n      name\n    }\n  }\n  Total(range: $range)\n}": typeof types.GetDaysDataDocument,
     "query GetLastDate {\n  LastDate\n}": typeof types.GetLastDateDocument,
-    "query GetTransactions($range: RangeInput) {\n  Transactions(range: $range) {\n    id\n    item\n    category {\n      id\n      name\n    }\n    date\n    amount\n  }\n}": typeof types.GetTransactionsDocument,
-    "query GetTransactionsByMonth($year: Int!) {\n  TransactionsByMonth(year: $year) {\n    categories {\n      id\n      name\n      transactions {\n        id\n        item\n        date\n        amount\n        category {\n          id\n          name\n        }\n      }\n      total\n    }\n    total\n  }\n}": typeof types.GetTransactionsByMonthDocument,
-    "query GetYearlyData($year: Int!, $range: RangeInput) {\n  TransactionsByMonth(year: $year) {\n    total\n    categories {\n      total\n      name\n      transactions {\n        id\n        item\n        amount\n        date\n        category {\n          id\n          name\n        }\n      }\n    }\n  }\n  Categories(range: $range) {\n    id\n    name\n    total(range: $range)\n  }\n  Years\n}": typeof types.GetYearlyDataDocument,
+    "query GetMonthlyTotals($year: Int!, $categoryID: ID, $search: String) {\n  GetMonthlyTotals(year: $year, categoryID: $categoryID, search: $search) {\n    month\n    total\n    count\n  }\n}": typeof types.GetMonthlyTotalsDocument,
+    "query GetTransactionsPaginated($year: Int!, $month: Int, $categoryID: ID, $page: Int, $limit: Int, $search: String, $sort: String) {\n  GetTransactionsPaginated(\n    year: $year\n    month: $month\n    categoryID: $categoryID\n    page: $page\n    limit: $limit\n    search: $search\n    sort: $sort\n  ) {\n    edges {\n      node {\n        id\n        item\n        category {\n          id\n          name\n        }\n        amount\n        date\n        isIncome\n        userId\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n    totalCount\n  }\n}": typeof types.GetTransactionsPaginatedDocument,
     "query GetYears {\n  Years\n}": typeof types.GetYearsDocument,
     "mutation UpdateTransaction($id: ID!, $input: UpdateTransactionInput!) {\n  updateTransaction(id: $id, input: $input) {\n    id\n    item\n    category {\n      id\n      name\n    }\n    amount\n    date\n  }\n}": typeof types.UpdateTransactionDocument,
 };
@@ -30,11 +30,11 @@ const documents: Documents = {
     "mutation CreateTransaction($input: TransactionInput!) {\n  createTransaction(input: $input) {\n    id\n    item\n    date\n    amount\n    category {\n      id\n      name\n    }\n  }\n}": types.CreateTransactionDocument,
     "mutation DeleteTransaction($id: ID!) {\n  deleteTransaction(id: $id) {\n    id\n    item\n    date\n    amount\n    category {\n      id\n      name\n    }\n  }\n}": types.DeleteTransactionDocument,
     "query GetCategories($range: RangeInput) {\n  Categories(range: $range) {\n    id\n    name\n  }\n}": types.GetCategoriesDocument,
+    "query GetCategoryTotals($year: Int!, $month: Int, $search: String) {\n  GetCategoryTotals(year: $year, month: $month, search: $search) {\n    category\n    total\n    count\n  }\n}": types.GetCategoryTotalsDocument,
     "query GetDaysData($range: RangeInput) {\n  Transactions(range: $range) {\n    id\n    item\n    amount\n    date\n    category {\n      id\n      name\n    }\n  }\n  Total(range: $range)\n}": types.GetDaysDataDocument,
     "query GetLastDate {\n  LastDate\n}": types.GetLastDateDocument,
-    "query GetTransactions($range: RangeInput) {\n  Transactions(range: $range) {\n    id\n    item\n    category {\n      id\n      name\n    }\n    date\n    amount\n  }\n}": types.GetTransactionsDocument,
-    "query GetTransactionsByMonth($year: Int!) {\n  TransactionsByMonth(year: $year) {\n    categories {\n      id\n      name\n      transactions {\n        id\n        item\n        date\n        amount\n        category {\n          id\n          name\n        }\n      }\n      total\n    }\n    total\n  }\n}": types.GetTransactionsByMonthDocument,
-    "query GetYearlyData($year: Int!, $range: RangeInput) {\n  TransactionsByMonth(year: $year) {\n    total\n    categories {\n      total\n      name\n      transactions {\n        id\n        item\n        amount\n        date\n        category {\n          id\n          name\n        }\n      }\n    }\n  }\n  Categories(range: $range) {\n    id\n    name\n    total(range: $range)\n  }\n  Years\n}": types.GetYearlyDataDocument,
+    "query GetMonthlyTotals($year: Int!, $categoryID: ID, $search: String) {\n  GetMonthlyTotals(year: $year, categoryID: $categoryID, search: $search) {\n    month\n    total\n    count\n  }\n}": types.GetMonthlyTotalsDocument,
+    "query GetTransactionsPaginated($year: Int!, $month: Int, $categoryID: ID, $page: Int, $limit: Int, $search: String, $sort: String) {\n  GetTransactionsPaginated(\n    year: $year\n    month: $month\n    categoryID: $categoryID\n    page: $page\n    limit: $limit\n    search: $search\n    sort: $sort\n  ) {\n    edges {\n      node {\n        id\n        item\n        category {\n          id\n          name\n        }\n        amount\n        date\n        isIncome\n        userId\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n    totalCount\n  }\n}": types.GetTransactionsPaginatedDocument,
     "query GetYears {\n  Years\n}": types.GetYearsDocument,
     "mutation UpdateTransaction($id: ID!, $input: UpdateTransactionInput!) {\n  updateTransaction(id: $id, input: $input) {\n    id\n    item\n    category {\n      id\n      name\n    }\n    amount\n    date\n  }\n}": types.UpdateTransactionDocument,
 };
@@ -54,6 +54,10 @@ export function graphql(source: "query GetCategories($range: RangeInput) {\n  Ca
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
+export function graphql(source: "query GetCategoryTotals($year: Int!, $month: Int, $search: String) {\n  GetCategoryTotals(year: $year, month: $month, search: $search) {\n    category\n    total\n    count\n  }\n}"): typeof import('./graphql').GetCategoryTotalsDocument;
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
 export function graphql(source: "query GetDaysData($range: RangeInput) {\n  Transactions(range: $range) {\n    id\n    item\n    amount\n    date\n    category {\n      id\n      name\n    }\n  }\n  Total(range: $range)\n}"): typeof import('./graphql').GetDaysDataDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
@@ -62,15 +66,11 @@ export function graphql(source: "query GetLastDate {\n  LastDate\n}"): typeof im
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "query GetTransactions($range: RangeInput) {\n  Transactions(range: $range) {\n    id\n    item\n    category {\n      id\n      name\n    }\n    date\n    amount\n  }\n}"): typeof import('./graphql').GetTransactionsDocument;
+export function graphql(source: "query GetMonthlyTotals($year: Int!, $categoryID: ID, $search: String) {\n  GetMonthlyTotals(year: $year, categoryID: $categoryID, search: $search) {\n    month\n    total\n    count\n  }\n}"): typeof import('./graphql').GetMonthlyTotalsDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
-export function graphql(source: "query GetTransactionsByMonth($year: Int!) {\n  TransactionsByMonth(year: $year) {\n    categories {\n      id\n      name\n      transactions {\n        id\n        item\n        date\n        amount\n        category {\n          id\n          name\n        }\n      }\n      total\n    }\n    total\n  }\n}"): typeof import('./graphql').GetTransactionsByMonthDocument;
-/**
- * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
- */
-export function graphql(source: "query GetYearlyData($year: Int!, $range: RangeInput) {\n  TransactionsByMonth(year: $year) {\n    total\n    categories {\n      total\n      name\n      transactions {\n        id\n        item\n        amount\n        date\n        category {\n          id\n          name\n        }\n      }\n    }\n  }\n  Categories(range: $range) {\n    id\n    name\n    total(range: $range)\n  }\n  Years\n}"): typeof import('./graphql').GetYearlyDataDocument;
+export function graphql(source: "query GetTransactionsPaginated($year: Int!, $month: Int, $categoryID: ID, $page: Int, $limit: Int, $search: String, $sort: String) {\n  GetTransactionsPaginated(\n    year: $year\n    month: $month\n    categoryID: $categoryID\n    page: $page\n    limit: $limit\n    search: $search\n    sort: $sort\n  ) {\n    edges {\n      node {\n        id\n        item\n        category {\n          id\n          name\n        }\n        amount\n        date\n        isIncome\n        userId\n      }\n      cursor\n    }\n    pageInfo {\n      hasNextPage\n      hasPreviousPage\n      startCursor\n      endCursor\n    }\n    totalCount\n  }\n}"): typeof import('./graphql').GetTransactionsPaginatedDocument;
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

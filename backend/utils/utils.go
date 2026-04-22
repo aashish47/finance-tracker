@@ -3,6 +3,7 @@ package utils
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/aashish47/finance-tracker/backend/middleware"
 	"github.com/dgrijalva/jwt-go"
@@ -21,4 +22,9 @@ func GetUserIDFromContext(ctx context.Context) (string, error) {
 	}
 
 	return userId, nil
+}
+
+func GetMonthAndYear(date *string) (int, int) {
+	lastDate, _ := time.Parse(time.RFC3339, *date)
+	return int(lastDate.Month()), lastDate.Year()
 }

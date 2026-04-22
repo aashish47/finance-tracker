@@ -1,5 +1,6 @@
 import CategorySelect from "@/components/dashboard/forms/CategorySelect";
 import DatePicker from "@/components/dashboard/forms/DatePicker";
+import { formSchema } from "@/components/dashboard/TransactionForm";
 import {
 	Form,
 	FormControl,
@@ -8,107 +9,102 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { formSchema } from "@/schemas/formSchema";
-import { Category } from "@/types/types";
+import { Query, Transaction } from "@/graphql/generated/graphql";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { PropsWithChildren } from "react";
 import { useForm } from "react-hook-form";
 
 interface EditFormProps {
-	id: number;
-	item: string;
-	amount: number;
-	category: {
-		id: number;
-		name: string;
-	};
-	date: string;
+	transaction: Transaction;
 	handleSubmit: (data: {
 		item: string;
 		amount: number;
-		category: string;
+		categoryID: string;
 		date: Date;
 	}) => Promise<void>;
-	categories: Category[];
+	categories: Query["Categories"];
 }
 
 const EditForm = ({
-	item,
-	amount,
-	category,
-	date,
+	transaction,
 	handleSubmit,
 	categories,
 	children,
 }: EditFormProps & PropsWithChildren) => {
+	const { item, amount, category, date } = transaction;
 	const form = useForm({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			item: item,
 			amount: amount,
-			category: category.id.toString(),
+			categoryID: category.id.toString(),
 			date: new Date(date),
 		},
 	});
 
 	return (
-		<div className="h-full overflow-auto p-0.5 pr-2">
-			<Form {...form}>
-				<form
-					onSubmit={form.handleSubmit(handleSubmit)}
-					className="flex h-full flex-col gap-2"
-				>
-					<FormField
-						name="item"
-						control={form.control}
-						render={({ field }) => (
-							<FormItem>
-								<FormControl>
-									<Input placeholder="Item" {...field} />
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+		<Form {...form}>
+			<form
+				onSubmit={form.handleSubmit(handleSubmit)}
+				className="flex h-full flex-col gap-2"
+			>
+				<FormField
+					name="item"
+					control={form.control}
+					render={({ field }) => (
+						<FormItem>
+							<FormControl>
+								<Input placeholder="Item" {...field} />
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
-					<FormField
-						name="amount"
-						control={form.control}
-						render={({ field }) => (
-							<FormItem>
-								<FormControl>
-									<Input
-										placeholder="Amount"
-										type="number"
-										{...field}
-										onChange={(e) => field.onChange(Number(e.target.value))}
-									/>
-								</FormControl>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+				<FormField
+					name="amount"
+					control={form.control}
+					render={({ field }) => (
+						<FormItem>
+							<FormControl>
+								<Input
+									{...field}
+									placeholder="Amount"
+									type="number"
+									value={field.value || ""}
+									onChange={(e) => {
+										const val = e.target.value;
+										field.onChange(val === "" ? "" : val);
+									}}
+								/>
+							</FormControl>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
-					<FormField
-						name="category"
-						control={form.control}
-						render={({ field }) => (
+				<FormField
+					name="categoryID"
+					control={form.control}
+					render={({ field }) => (
+						<FormItem className="space-y-0">
 							<CategorySelect field={field} categories={categories} />
-						)}
-					/>
+							<FormMessage />
+						</FormItem>
+					)}
+				/>
 
-					<FormField
-						name="date"
-						control={form.control}
-						render={({ field }) => <DatePicker field={field} />}
-					/>
+				<FormField
+					name="date"
+					control={form.control}
+					render={({ field }) => <DatePicker field={field} />}
+				/>
 
-					<div className="flex-grow" />
+				<div className="grow" />
 
-					{children}
-				</form>
-			</Form>
-		</div>
+				{children}
+			</form>
+		</Form>
 	);
 };
 

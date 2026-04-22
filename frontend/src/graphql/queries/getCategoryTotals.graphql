@@ -1,0 +1,7 @@
+query GetCategoryTotals($year: Int!, $month: Int, $search: String) {
+	GetCategoryTotals(year: $year, month: $month, search: $search) {
+		category
+		total
+		count
+	}
+}

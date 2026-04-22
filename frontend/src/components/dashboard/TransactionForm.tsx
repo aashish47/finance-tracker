@@ -11,45 +11,50 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Query } from "@/graphql/generated/graphql";
 import { createTransaction } from "@/lib/actions";
-import { formSchema } from "@/schemas/formSchema";
-import { Category } from "@/types/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
+import z from "zod";
+
+export const formSchema = z.object({
+	item: z.string().min(1, "Item is required"),
+	amount: z
+		.union([z.number(), z.string()])
+		.transform((val) => (val === "" ? undefined : Number(val)))
+		.pipe(z.number().positive("Amount must be positive")),
+	categoryID: z.string().nonempty("Category is required"),
+	date: z.date(),
+});
 
 interface TransactionFormProps {
-	data: Category[];
+	categories: Query["Categories"];
 }
 
-const TransactionForm = ({ data: categories }: TransactionFormProps) => {
-	// console.log(`Form rendered at: ${new Date().toLocaleTimeString()}`);
+export type TransactionFormValues = z.input<typeof formSchema>;
+
+const TransactionForm: React.FC<TransactionFormProps> = ({ categories }) => {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<null | string>(null);
 
-	const form = useForm({
+	const form = useForm<TransactionFormValues>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			item: "",
 			amount: "",
-			category: "1",
+			categoryID: "1",
 			date: new Date(),
 		},
 	});
 
-	const handleSubmit = async (data: {
-		item: string;
-		e;
-		category: string;
-		amount: string;
-		date: Date;
-	}) => {
+	const handleSubmit: SubmitHandler<TransactionFormValues> = async (data) => {
 		setLoading(true);
 		const { error } = await createTransaction({
 			input: {
 				item: data.item,
-				categoryID: data.category,
+				categoryID: data.categoryID,
 				isIncome: false,
 				date: format(data.date, "yyyy-MM-dd"),
 				amount: Number(data.amount),
@@ -87,10 +92,14 @@ const TransactionForm = ({ data: categories }: TransactionFormProps) => {
 							<FormItem>
 								<FormControl>
 									<Input
+										{...field}
 										placeholder="Amount"
 										type="number"
-										{...field}
-										onChange={(e) => field.onChange(Number(e.target.value))}
+										value={field.value || ""}
+										onChange={(e) => {
+											const val = e.target.value;
+											field.onChange(val === "" ? "" : val);
+										}}
 									/>
 								</FormControl>
 								<FormMessage />
@@ -99,10 +108,13 @@ const TransactionForm = ({ data: categories }: TransactionFormProps) => {
 					/>
 
 					<FormField
-						name="category"
+						name="categoryID"
 						control={form.control}
 						render={({ field }) => (
-							<CategorySelect field={field} categories={categories} />
+							<FormItem className="space-y-0">
+								<CategorySelect field={field} categories={categories} />
+								<FormMessage />
+							</FormItem>
 						)}
 					/>
 
@@ -112,7 +124,7 @@ const TransactionForm = ({ data: categories }: TransactionFormProps) => {
 						render={({ field }) => <DatePicker field={field} />}
 					/>
 
-					<div className="flex-grow" />
+					<div className="grow" />
 					<Button type="submit" disabled={loading}>
 						{loading ? "Submitting..." : "Add Transaction"}
 					</Button>

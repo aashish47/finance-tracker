@@ -15,16 +15,54 @@ type Category {
 	total(range: RangeInput): Float
 }
 
-type MonthSummary {
+type CategoryTotal {
+	category: String!
+	total: Float!
+	count: Int!
+}
+
+type MonthlyTotal {
 	month: Int!
-	categories: [Category]
-	total: Float
+	total: Float!
+	count: Int!
+}
+
+type PageInfo {
+	hasNextPage: Boolean!
+	hasPreviousPage: Boolean!
+	startCursor: String
+	endCursor: String
+}
+
+type TransactionEdge {
+	node: Transaction!
+	cursor: String!
+}
+
+type TransactionConnection {
+	edges: [TransactionEdge!]!
+	pageInfo: PageInfo!
+	totalCount: Int!
 }
 
 type Query {
 	Transactions(range: RangeInput): [Transaction]
 	Transaction(id: ID!): Transaction
-	TransactionsByMonth(year: Int!): [MonthSummary]
+	GetCategoryTotals(year: Int!, month: Int, search: String): [CategoryTotal!]
+	GetMonthlyTotals(
+		year: Int!
+		categoryID: ID
+		search: String
+	): [MonthlyTotal!]
+	GetTransactionsPaginated(
+		year: Int!
+		month: Int
+		categoryID: ID
+		page: Int
+		limit: Int
+		search: String
+		sort: String
+	): TransactionConnection!
 	Categories(range: RangeInput): [Category]
 	Category(id: ID!, range: RangeInput): Category
 	Years: [Int]

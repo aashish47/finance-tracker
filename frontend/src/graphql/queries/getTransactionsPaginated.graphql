@@ -1,0 +1,42 @@
+query GetTransactionsPaginated(
+	$year: Int!
+	$month: Int
+	$categoryID: ID
+	$page: Int
+	$limit: Int
+	$search: String
+	$sort: String
+) {
+	GetTransactionsPaginated(
+		year: $year
+		month: $month
+		categoryID: $categoryID
+		page: $page
+		limit: $limit
+		search: $search
+		sort: $sort
+	) {
+		edges {
+			node {
+				id
+				item
+				category {
+					id
+					name
+				}
+				amount
+				date
+				isIncome
+				userId
+			}
+			cursor
+		}
+		pageInfo {
+			hasNextPage
+			hasPreviousPage
+			startCursor
+			endCursor
+		}
+		totalCount
+	}
+}

@@ -7,27 +7,20 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { UrlProps, UserMetadata } from "@/types/types";
-import { buildUrl } from "@/utils/buildUrl";
+import { Query } from "@/graphql/generated/graphql";
+import { buildUrl, UrlProps } from "@/utils/buildUrl";
+import { UserMetadata } from "@supabase/supabase-js";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 interface NavbarProps {
 	userData?: UserMetadata;
-	data: number[];
+	years: Query["Years"];
 }
 
-const Navbar = ({
-	userData,
-	data,
-	selectedYear,
-	selectedCategory,
-	selectedMonth,
-	selectedDate,
-	selectedTab,
-}: NavbarProps & UrlProps) => {
+const Navbar = (props: NavbarProps & UrlProps) => {
+	const { userData, years, year, ...rest } = props;
 	const router = useRouter();
-	// console.log(`Navbar rendered at: ${new Date().toLocaleTimeString()}`);
 	return (
 		userData && (
 			<nav className="bubble flex h-12 items-center justify-between">
@@ -35,28 +28,27 @@ const Navbar = ({
 
 				<Select
 					onValueChange={(value) => {
-						selectedYear = Number(value);
 						const url = buildUrl({
-							selectedYear,
-							selectedMonth,
-							selectedCategory,
-							selectedTab,
-							selectedDate,
+							year: Number(value),
+							...rest,
 						});
 						router.push(url);
 					}}
-					value={selectedYear.toString()}
+					value={year.toString()}
 				>
 					<SelectTrigger className="">
 						<SelectValue placeholder="Select Year" />
 					</SelectTrigger>
 					<SelectContent position="popper" align="start">
-						{data &&
-							data.map((year: number) => (
-								<SelectItem key={year} value={year.toString()}>
-									{year}
-								</SelectItem>
-							))}
+						{years &&
+							years.map(
+								(year) =>
+									year && (
+										<SelectItem key={year} value={year.toString()}>
+											{year}
+										</SelectItem>
+									),
+							)}
 					</SelectContent>
 				</Select>
 				<p className="text-center md:text-xl md:font-semibold">Dashboard</p>

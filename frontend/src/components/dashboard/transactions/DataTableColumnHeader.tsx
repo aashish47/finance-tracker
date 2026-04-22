@@ -1,6 +1,3 @@
-import { Column } from "@tanstack/react-table";
-import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
@@ -9,21 +6,44 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/utils/conditional";
+import { cn } from "@/lib/utils";
+import { Column } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ChevronsUpDown, EyeOff } from "lucide-react";
 
-interface DataTableColumnHeaderProps<TData, TValue>
-	extends React.HTMLAttributes<HTMLDivElement> {
+interface DataTableColumnHeaderProps<
+	TData,
+	TValue,
+> extends React.HTMLAttributes<HTMLDivElement> {
 	column: Column<TData, TValue>;
 	title: string;
+	sort?: string;
+	onSortChange?: (columnId: string, desc: boolean) => void;
 }
 
 export function DataTableColumnHeader<TData, TValue>({
 	column,
 	title,
 	className,
+	sort,
+	onSortChange,
 }: DataTableColumnHeaderProps<TData, TValue>) {
 	if (!column.getCanSort()) {
 		return <div className={cn(className)}>{title}</div>;
+	}
+
+	// Determine current sort state based on sort param
+	const columnId = column.id;
+	const currentSort = sort || "";
+	let isSorted: "asc" | "desc" | false = false;
+
+	if (currentSort === "date_asc" && columnId === "date") {
+		isSorted = "asc";
+	} else if (currentSort === "date_desc" && columnId === "date") {
+		isSorted = "desc";
+	} else if (currentSort === "amnt_asc" && columnId === "amount") {
+		isSorted = "asc";
+	} else if (currentSort === "amnt_desc" && columnId === "amount") {
+		isSorted = "desc";
 	}
 
 	return (
@@ -33,12 +53,12 @@ export function DataTableColumnHeader<TData, TValue>({
 					<Button
 						variant="ghost"
 						size="sm"
-						className="-ml-3 h-8 data-[state=open]:bg-accent"
+						className="data-[state=open]:bg-accent -ml-3 h-8"
 					>
 						<span>{title}</span>
-						{column.getIsSorted() === "desc" ? (
+						{isSorted === "desc" ? (
 							<ArrowDown />
-						) : column.getIsSorted() === "asc" ? (
+						) : isSorted === "asc" ? (
 							<ArrowUp />
 						) : (
 							<ChevronsUpDown />
@@ -46,17 +66,17 @@ export function DataTableColumnHeader<TData, TValue>({
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent align="start">
-					<DropdownMenuItem onClick={() => column.toggleSorting(false)}>
-						<ArrowUp className="h-3.5 w-3.5 text-muted-foreground/70" />
+					<DropdownMenuItem onClick={() => onSortChange?.(columnId, false)}>
+						<ArrowUp className="text-muted-foreground/70 h-3.5 w-3.5" />
 						Asc
 					</DropdownMenuItem>
-					<DropdownMenuItem onClick={() => column.toggleSorting(true)}>
-						<ArrowDown className="h-3.5 w-3.5 text-muted-foreground/70" />
+					<DropdownMenuItem onClick={() => onSortChange?.(columnId, true)}>
+						<ArrowDown className="text-muted-foreground/70 h-3.5 w-3.5" />
 						Desc
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
 					<DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
-						<EyeOff className="h-3.5 w-3.5 text-muted-foreground/70" />
+						<EyeOff className="text-muted-foreground/70 h-3.5 w-3.5" />
 						Hide
 					</DropdownMenuItem>
 				</DropdownMenuContent>

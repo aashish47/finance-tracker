@@ -34,11 +34,18 @@ export type CategoryTransactionsArgs = {
   range?: InputMaybe<RangeInput>;
 };
 
-export type MonthSummary = {
-  __typename?: 'MonthSummary';
-  categories?: Maybe<Array<Maybe<Category>>>;
+export type CategoryTotal = {
+  __typename?: 'CategoryTotal';
+  category: Scalars['String']['output'];
+  count: Scalars['Int']['output'];
+  total: Scalars['Float']['output'];
+};
+
+export type MonthlyTotal = {
+  __typename?: 'MonthlyTotal';
+  count: Scalars['Int']['output'];
   month: Scalars['Int']['output'];
-  total?: Maybe<Scalars['Float']['output']>;
+  total: Scalars['Float']['output'];
 };
 
 export type Mutation = {
@@ -64,15 +71,25 @@ export type MutationUpdateTransactionArgs = {
   input: UpdateTransactionInput;
 };
 
+export type PageInfo = {
+  __typename?: 'PageInfo';
+  endCursor?: Maybe<Scalars['String']['output']>;
+  hasNextPage: Scalars['Boolean']['output'];
+  hasPreviousPage: Scalars['Boolean']['output'];
+  startCursor?: Maybe<Scalars['String']['output']>;
+};
+
 export type Query = {
   __typename?: 'Query';
   Categories?: Maybe<Array<Maybe<Category>>>;
   Category?: Maybe<Category>;
+  GetCategoryTotals?: Maybe<Array<CategoryTotal>>;
+  GetMonthlyTotals?: Maybe<Array<MonthlyTotal>>;
+  GetTransactionsPaginated: TransactionConnection;
   LastDate?: Maybe<Scalars['String']['output']>;
   Total?: Maybe<Scalars['Float']['output']>;
   Transaction?: Maybe<Transaction>;
   Transactions?: Maybe<Array<Maybe<Transaction>>>;
-  TransactionsByMonth?: Maybe<Array<Maybe<MonthSummary>>>;
   Years?: Maybe<Array<Maybe<Scalars['Int']['output']>>>;
 };
 
@@ -85,6 +102,31 @@ export type QueryCategoriesArgs = {
 export type QueryCategoryArgs = {
   id: Scalars['ID']['input'];
   range?: InputMaybe<RangeInput>;
+};
+
+
+export type QueryGetCategoryTotalsArgs = {
+  month?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryGetMonthlyTotalsArgs = {
+  categoryID?: InputMaybe<Scalars['ID']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
+};
+
+
+export type QueryGetTransactionsPaginatedArgs = {
+  categoryID?: InputMaybe<Scalars['ID']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  month?: InputMaybe<Scalars['Int']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
+  year: Scalars['Int']['input'];
 };
 
 
@@ -102,11 +144,6 @@ export type QueryTransactionsArgs = {
   range?: InputMaybe<RangeInput>;
 };
 
-
-export type QueryTransactionsByMonthArgs = {
-  year: Scalars['Int']['input'];
-};
-
 export type RangeInput = {
   endDate: Scalars['String']['input'];
   startDate: Scalars['String']['input'];
@@ -121,6 +158,19 @@ export type Transaction = {
   isIncome: Scalars['Boolean']['output'];
   item: Scalars['String']['output'];
   userId: Scalars['String']['output'];
+};
+
+export type TransactionConnection = {
+  __typename?: 'TransactionConnection';
+  edges: Array<TransactionEdge>;
+  pageInfo: PageInfo;
+  totalCount: Scalars['Int']['output'];
+};
+
+export type TransactionEdge = {
+  __typename?: 'TransactionEdge';
+  cursor: Scalars['String']['output'];
+  node: Transaction;
 };
 
 export type TransactionInput = {
@@ -160,6 +210,15 @@ export type GetCategoriesQueryVariables = Exact<{
 
 export type GetCategoriesQuery = { __typename?: 'Query', Categories?: Array<{ __typename?: 'Category', id: string, name: string } | null> | null };
 
+export type GetCategoryTotalsQueryVariables = Exact<{
+  year: Scalars['Int']['input'];
+  month?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+}>;
+
+
+export type GetCategoryTotalsQuery = { __typename?: 'Query', GetCategoryTotals?: Array<{ __typename?: 'CategoryTotal', category: string, total: number, count: number }> | null };
+
 export type GetDaysDataQueryVariables = Exact<{
   range?: InputMaybe<RangeInput>;
 }>;
@@ -172,27 +231,27 @@ export type GetLastDateQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type GetLastDateQuery = { __typename?: 'Query', LastDate?: string | null };
 
-export type GetTransactionsQueryVariables = Exact<{
-  range?: InputMaybe<RangeInput>;
-}>;
-
-
-export type GetTransactionsQuery = { __typename?: 'Query', Transactions?: Array<{ __typename?: 'Transaction', id: string, item: string, date: string, amount: number, category: { __typename?: 'Category', id: string, name: string } } | null> | null };
-
-export type GetTransactionsByMonthQueryVariables = Exact<{
+export type GetMonthlyTotalsQueryVariables = Exact<{
   year: Scalars['Int']['input'];
+  categoryID?: InputMaybe<Scalars['ID']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetTransactionsByMonthQuery = { __typename?: 'Query', TransactionsByMonth?: Array<{ __typename?: 'MonthSummary', total?: number | null, categories?: Array<{ __typename?: 'Category', id: string, name: string, total?: number | null, transactions?: Array<{ __typename?: 'Transaction', id: string, item: string, date: string, amount: number, category: { __typename?: 'Category', id: string, name: string } } | null> | null } | null> | null } | null> | null };
+export type GetMonthlyTotalsQuery = { __typename?: 'Query', GetMonthlyTotals?: Array<{ __typename?: 'MonthlyTotal', month: number, total: number, count: number }> | null };
 
-export type GetYearlyDataQueryVariables = Exact<{
+export type GetTransactionsPaginatedQueryVariables = Exact<{
   year: Scalars['Int']['input'];
-  range?: InputMaybe<RangeInput>;
+  month?: InputMaybe<Scalars['Int']['input']>;
+  categoryID?: InputMaybe<Scalars['ID']['input']>;
+  page?: InputMaybe<Scalars['Int']['input']>;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  search?: InputMaybe<Scalars['String']['input']>;
+  sort?: InputMaybe<Scalars['String']['input']>;
 }>;
 
 
-export type GetYearlyDataQuery = { __typename?: 'Query', Years?: Array<number | null> | null, TransactionsByMonth?: Array<{ __typename?: 'MonthSummary', total?: number | null, categories?: Array<{ __typename?: 'Category', total?: number | null, name: string, transactions?: Array<{ __typename?: 'Transaction', id: string, item: string, amount: number, date: string, category: { __typename?: 'Category', id: string, name: string } } | null> | null } | null> | null } | null> | null, Categories?: Array<{ __typename?: 'Category', id: string, name: string, total?: number | null } | null> | null };
+export type GetTransactionsPaginatedQuery = { __typename?: 'Query', GetTransactionsPaginated: { __typename?: 'TransactionConnection', totalCount: number, edges: Array<{ __typename?: 'TransactionEdge', cursor: string, node: { __typename?: 'Transaction', id: string, item: string, amount: number, date: string, isIncome: boolean, userId: string, category: { __typename?: 'Category', id: string, name: string } } }>, pageInfo: { __typename?: 'PageInfo', hasNextPage: boolean, hasPreviousPage: boolean, startCursor?: string | null, endCursor?: string | null } } };
 
 export type GetYearsQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -262,6 +321,15 @@ export const GetCategoriesDocument = new TypedDocumentString(`
   }
 }
     `) as unknown as TypedDocumentString<GetCategoriesQuery, GetCategoriesQueryVariables>;
+export const GetCategoryTotalsDocument = new TypedDocumentString(`
+    query GetCategoryTotals($year: Int!, $month: Int, $search: String) {
+  GetCategoryTotals(year: $year, month: $month, search: $search) {
+    category
+    total
+    count
+  }
+}
+    `) as unknown as TypedDocumentString<GetCategoryTotalsQuery, GetCategoryTotalsQueryVariables>;
 export const GetDaysDataDocument = new TypedDocumentString(`
     query GetDaysData($range: RangeInput) {
   Transactions(range: $range) {
@@ -282,69 +350,51 @@ export const GetLastDateDocument = new TypedDocumentString(`
   LastDate
 }
     `) as unknown as TypedDocumentString<GetLastDateQuery, GetLastDateQueryVariables>;
-export const GetTransactionsDocument = new TypedDocumentString(`
-    query GetTransactions($range: RangeInput) {
-  Transactions(range: $range) {
-    id
-    item
-    category {
-      id
-      name
-    }
-    date
-    amount
+export const GetMonthlyTotalsDocument = new TypedDocumentString(`
+    query GetMonthlyTotals($year: Int!, $categoryID: ID, $search: String) {
+  GetMonthlyTotals(year: $year, categoryID: $categoryID, search: $search) {
+    month
+    total
+    count
   }
 }
-    `) as unknown as TypedDocumentString<GetTransactionsQuery, GetTransactionsQueryVariables>;
-export const GetTransactionsByMonthDocument = new TypedDocumentString(`
-    query GetTransactionsByMonth($year: Int!) {
-  TransactionsByMonth(year: $year) {
-    categories {
-      id
-      name
-      transactions {
+    `) as unknown as TypedDocumentString<GetMonthlyTotalsQuery, GetMonthlyTotalsQueryVariables>;
+export const GetTransactionsPaginatedDocument = new TypedDocumentString(`
+    query GetTransactionsPaginated($year: Int!, $month: Int, $categoryID: ID, $page: Int, $limit: Int, $search: String, $sort: String) {
+  GetTransactionsPaginated(
+    year: $year
+    month: $month
+    categoryID: $categoryID
+    page: $page
+    limit: $limit
+    search: $search
+    sort: $sort
+  ) {
+    edges {
+      node {
         id
         item
-        date
-        amount
         category {
           id
           name
         }
-      }
-      total
-    }
-    total
-  }
-}
-    `) as unknown as TypedDocumentString<GetTransactionsByMonthQuery, GetTransactionsByMonthQueryVariables>;
-export const GetYearlyDataDocument = new TypedDocumentString(`
-    query GetYearlyData($year: Int!, $range: RangeInput) {
-  TransactionsByMonth(year: $year) {
-    total
-    categories {
-      total
-      name
-      transactions {
-        id
-        item
         amount
         date
-        category {
-          id
-          name
-        }
+        isIncome
+        userId
       }
+      cursor
     }
+    pageInfo {
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    }
+    totalCount
   }
-  Categories(range: $range) {
-    id
-    name
-    total(range: $range)
-  }
-  Years
 }
-    `) as unknown as TypedDocumentString<GetYearlyDataQuery, GetYearlyDataQueryVariables>;
+    `) as unknown as TypedDocumentString<GetTransactionsPaginatedQuery, GetTransactionsPaginatedQueryVariables>;
 export const GetYearsDocument = new TypedDocumentString(`
     query GetYears {
   Years

@@ -1,30 +1,61 @@
-import { UrlProps } from "@/types/types";
 import { format } from "date-fns";
 
+export interface UrlProps {
+	year: number;
+	month?: number;
+	category?: string;
+	tab?: number;
+	date: string;
+	page: number;
+	limit: number;
+	search?: string;
+	sort?: string;
+}
+
 export const buildUrl = ({
-	selectedYear,
-	selectedMonth,
-	selectedCategory,
-	selectedTab,
-	selectedDate,
+	year,
+	month,
+	category,
+	tab,
+	date,
+	page,
+	limit,
+	search,
+	sort,
 }: UrlProps) => {
 	const params = new URLSearchParams();
-	params.set("year", selectedYear.toString());
+	params.set("year", year.toString());
 
-	if (selectedMonth !== undefined) {
-		params.set("month", (selectedMonth + 1).toString());
+	if (month !== undefined) {
+		params.set("month", (month + 1).toString());
 	}
 
-	if (selectedCategory) {
-		params.set("category", selectedCategory);
+	if (category) {
+		params.set("category", category);
 	}
 
-	if (selectedTab) {
-		params.set("tab", selectedTab.toString());
+	if (tab) {
+		params.set("tab", tab.toString());
 	}
 
-	if (selectedDate) {
-		params.set("date", format(new Date(selectedDate), "yyyy-MM-dd"));
+	if (date) {
+		params.set("date", format(new Date(date), "yyyy-MM-dd"));
+	}
+
+	if (page) {
+		params.set("page", page.toString());
+	}
+
+	if (limit) {
+		params.set("limit", limit.toString());
+	}
+
+	if (search) {
+		params.set("search", search);
+	}
+
+	if (sort) {
+		params.set("sort", sort);
 	}
 
 	const url = `/home?${params.toString()}`;

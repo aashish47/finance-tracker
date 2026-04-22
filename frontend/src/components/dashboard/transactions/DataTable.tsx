@@ -1,23 +1,8 @@
 "use client";
 
-import {
-	ColumnDef,
-	ColumnFiltersState,
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	SortingState,
-	useReactTable,
-	VisibilityState,
-} from "@tanstack/react-table";
-
-import Cell from "@/components/dashboard/transactions/Cell";
-import { DataTableColumnHeader } from "@/components/dashboard/transactions/DataTableColumnHeader";
+import { getcolumns } from "@/components/dashboard/transactions/Columns";
 import { DataTablePagination } from "@/components/dashboard/transactions/DataTablePagination";
 import { DataTableViewOptions } from "@/components/dashboard/transactions/DataTableViewOptions";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -28,180 +13,205 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { Category, Transaction } from "@/types/types";
-import { capitalize } from "@/utils/capitalize";
-import { formatCurrency } from "@/utils/formatCurrency";
-import { format } from "date-fns";
-import { useState } from "react";
+import {
+	GetTransactionsPaginatedQuery,
+	Query,
+} from "@/graphql/generated/graphql";
+import { buildUrl, UrlProps } from "@/utils/buildUrl";
+import {
+	ColumnFiltersState,
+	flexRender,
+	getCoreRowModel,
+	useReactTable,
+	VisibilityState,
+} from "@tanstack/react-table";
+import { X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-interface DataTableProps<TData> {
-	categories: Category[];
-	// columns: ColumnDef<TData, TValue>[];
-	data: TData[];
+interface DataTableProps {
+	categories: Query["Categories"];
+	transactionConnection: GetTransactionsPaginatedQuery["GetTransactionsPaginated"];
 }
 
-export function DataTable<TData>({
-	// columns,
-	categories,
-	data,
-}: DataTableProps<TData>) {
+export function DataTable(props: DataTableProps & UrlProps) {
 	// console.log(`Table rendered at: ${new Date().toLocaleTimeString()}`);
-	const columns: ColumnDef<TData>[] = [
-		{
-			id: "select",
-			header: ({ table }) => (
-				<Checkbox
-					checked={
-						table.getIsAllPageRowsSelected() ||
-						(table.getIsSomePageRowsSelected() && "indeterminate")
-					}
-					onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-					aria-label="Select all"
-				/>
-			),
-			cell: ({ row }) => (
-				<Checkbox
-					checked={row.getIsSelected()}
-					onCheckedChange={(value) => row.toggleSelected(!!value)}
-					aria-label="Select row"
-				/>
-			),
-			enableSorting: false,
-			enableHiding: false,
-		},
-		{
-			accessorKey: "date",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Date" />
-			),
-			cell: ({ row }) => {
-				const date: string = row.getValue("date");
-				const formatted = format(new Date(date), "dd-MMM-yy");
+	const router = useRouter();
+	const {
+		categories,
+		transactionConnection,
+		page,
+		limit,
+		search,
+		sort,
+		...rest
+	} = props;
+	const { edges, ...info } = transactionConnection;
+	const data = edges.map((edge) => edge.node);
 
-				return <div>{formatted}</div>;
-			},
-		},
-		{
-			accessorKey: "item",
-			header: "Item",
-			cell: ({ row }) => {
-				const item = row.getValue("item") as string;
-				return <div>{capitalize(item)}</div>;
-			},
-		},
-		{
-			accessorKey: "category",
-			header: "Category",
-			cell: ({ row }) => {
-				const { name }: Transaction["category"] = row.getValue("category");
-				return <div>{name}</div>;
-			},
-		},
-		{
-			accessorKey: "amount",
-			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Amount" />
-			),
-			cell: ({ row }) => {
-				const amount = parseFloat(row.getValue("amount"));
-				return <div>{formatCurrency(amount)}</div>;
-			},
-		},
-		{
-			id: "actions",
-			cell: ({ row }) => <Cell row={row} categories={categories} />,
-		},
-	];
-	const [sorting, setSorting] = useState<SortingState>([]);
 	const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 	const [rowSelection, setRowSelection] = useState({});
+	const [localSearch, setLocalSearch] = useState<string>(search ?? "");
+
+	const handleSortChange = useCallback(
+		(columnId: string, desc: boolean) => {
+			const sortMap: Record<string, Record<string, string>> = {
+				date: { false: "date_asc", true: "date_desc" },
+				amount: { false: "amnt_asc", true: "amnt_desc" },
+			};
+			const desc_string = desc ? "true" : "false";
+			const newSort = sortMap[columnId]?.[desc_string];
+			if (newSort) {
+				const newUrl = buildUrl({
+					page: 1,
+					limit,
+					search: localSearch || undefined,
+					sort: newSort,
+					...rest,
+				});
+				router.push(newUrl);
+			}
+		},
+		[localSearch, limit, rest, router],
+	);
+
+	const columns = useMemo(
+		() => getcolumns(categories, sort, handleSortChange),
+		[categories, sort, handleSortChange],
+	);
+
+	// Debounced search effect
+	useEffect(() => {
+		if (localSearch === (search ?? "")) return;
+		const timer = setTimeout(() => {
+			const newUrl = buildUrl({
+				page: 1,
+				limit,
+				search: localSearch || undefined,
+				sort,
+				...rest,
+			});
+			router.push(newUrl);
+		}, 400);
+
+		return () => clearTimeout(timer);
+	}, [localSearch, limit, rest, router, search, sort]);
+
+	useEffect(() => {
+		setLocalSearch(search ?? "");
+	}, [search]);
+
 	const table = useReactTable({
 		data,
 		columns,
+		manualPagination: true,
 		getCoreRowModel: getCoreRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		onSortingChange: setSorting,
 		onColumnFiltersChange: setColumnFilters,
 		onColumnVisibilityChange: setColumnVisibility,
 		onRowSelectionChange: setRowSelection,
 		state: {
-			sorting,
 			columnFilters,
 			columnVisibility,
 			rowSelection,
 		},
 	});
 
+	const handlePaginationChange = (pagination: {
+		page?: number;
+		limit?: number;
+	}) => {
+		const newUrl = buildUrl({
+			page: pagination.page ?? page,
+			limit: pagination.limit ?? limit,
+			search: localSearch || undefined,
+			sort,
+			...rest,
+		});
+		router.push(newUrl);
+	};
+
 	return (
 		<div className="flex h-full flex-col justify-between">
 			<div className="flex items-center">
-				<Input
-					placeholder="Filter items..."
-					value={(table.getColumn("item")?.getFilterValue() as string) ?? ""}
-					onChange={(event) =>
-						table.getColumn("item")?.setFilterValue(event.target.value)
-					}
-					className="max-w-sm"
-				/>
+				<div className="relative w-full max-w-sm">
+					<Input
+						placeholder="Filter items..."
+						value={localSearch}
+						onChange={(event) => setLocalSearch(event.target.value)}
+						className="pr-8"
+					/>
+					{localSearch && (
+						<button
+							type="button"
+							onClick={() => setLocalSearch("")}
+							className="text-muted-foreground hover:bg-secondary hover:text-foreground absolute top-1/2 right-2.5 -translate-y-1/2 rounded-full p-0.5 transition-colors"
+							aria-label="Clear search"
+						>
+							<X className="h-4 w-4" />
+						</button>
+					)}
+				</div>
 				<DataTableViewOptions table={table} />
 			</div>
-			<div className="my-2 max-h-[calc(100%-84px)] rounded-md border">
-				<ScrollArea className="h-full w-full">
-					<Table>
-						<TableHeader className="sticky top-0 z-10 bg-secondary">
-							{table.getHeaderGroups().map((headerGroup) => (
-								<TableRow key={headerGroup.id}>
-									{headerGroup.headers.map((header) => {
-										return (
-											<TableHead key={header.id}>
-												{header.isPlaceholder
-													? null
-													: flexRender(
-															header.column.columnDef.header,
-															header.getContext(),
-														)}
-											</TableHead>
-										);
-									})}
+			<ScrollArea className="my-2 max-h-[calc(100%-84px)] rounded-md border">
+				<Table>
+					<TableHeader className="bg-accent sticky top-0 z-10">
+						{table.getHeaderGroups().map((headerGroup) => (
+							<TableRow key={headerGroup.id}>
+								{headerGroup.headers.map((header) => {
+									return (
+										<TableHead key={header.id}>
+											{header.isPlaceholder
+												? null
+												: flexRender(
+														header.column.columnDef.header,
+														header.getContext(),
+													)}
+										</TableHead>
+									);
+								})}
+							</TableRow>
+						))}
+					</TableHeader>
+					<TableBody>
+						{table.getRowModel().rows?.length ? (
+							table.getRowModel().rows.map((row) => (
+								<TableRow
+									key={row.id}
+									data-state={row.getIsSelected() && "selected"}
+								>
+									{row.getVisibleCells().map((cell) => (
+										<TableCell key={cell.id}>
+											{flexRender(
+												cell.column.columnDef.cell,
+												cell.getContext(),
+											)}
+										</TableCell>
+									))}
 								</TableRow>
-							))}
-						</TableHeader>
-						<TableBody>
-							{table.getRowModel().rows?.length ? (
-								table.getRowModel().rows.map((row) => (
-									<TableRow
-										key={row.id}
-										data-state={row.getIsSelected() && "selected"}
-									>
-										{row.getVisibleCells().map((cell) => (
-											<TableCell key={cell.id}>
-												{flexRender(
-													cell.column.columnDef.cell,
-													cell.getContext(),
-												)}
-											</TableCell>
-										))}
-									</TableRow>
-								))
-							) : (
-								<TableRow>
-									<TableCell
-										colSpan={columns.length}
-										className="h-24 text-center"
-									>
-										No results.
-									</TableCell>
-								</TableRow>
-							)}
-						</TableBody>
-					</Table>
-				</ScrollArea>
-			</div>
-			<div className="flex-grow"></div>
-			<DataTablePagination table={table} />
+							))
+						) : (
+							<TableRow>
+								<TableCell
+									colSpan={columns.length}
+									className="h-24 text-center"
+								>
+									No results.
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
+			</ScrollArea>
+			<div className="grow"></div>
+			<DataTablePagination
+				{...info}
+				table={table}
+				currentPage={page}
+				pageSize={limit}
+				onPaginationChange={handlePaginationChange}
+			/>
 		</div>
 	);
 }

@@ -4,13 +4,8 @@ import * as dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 const config: CodegenConfig = {
-	schema: {
-		[process.env.NEXT_PUBLIC_SERVER as string]: {
-			headers: {
-				Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
-			},
-		},
-	},
+	// Use local schema file to allow codegen without a running server
+	schema: "../backend/graphql/schema.graphqls",
 
 	documents: ["src/graphql/**/*.graphql"],
 	generates: {

@@ -1,3 +1,4 @@
+import { TransactionFormValues } from "@/components/dashboard/TransactionForm";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { FormControl, FormItem, FormMessage } from "@/components/ui/form";
@@ -6,26 +7,11 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from "@/components/ui/popover";
-import { cn } from "@/utils/conditional";
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { useState } from "react";
 import { ControllerRenderProps, FieldValues, Path } from "react-hook-form";
-
-// Define a type for the two possible forms
-type FormWithAmountAsNumber = {
-	item: string;
-	amount: number;
-	category: string;
-	date: Date;
-};
-
-type FormWithAmountAsString = {
-	item: string;
-	amount: string;
-	category: string;
-	date: Date;
-};
 
 // Add the `FieldValues` constraint to `TFormValues`
 // Path<TFormValues> ensures that the 'date' is a valid key in the form
@@ -34,9 +20,7 @@ type DatePickerProps<TFormValues extends FieldValues> = {
 };
 
 // Usage in component (example):
-const DatePicker = <
-	TFormValues extends FormWithAmountAsNumber | FormWithAmountAsString,
->({
+const DatePicker = <TFormValues extends TransactionFormValues>({
 	field,
 }: DatePickerProps<TFormValues>) => {
 	const [isPopoverOpen, setIsPopoverOpen] = useState(false);

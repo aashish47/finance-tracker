@@ -9,13 +9,26 @@ type Category struct {
 	Total        *float64       `json:"total,omitempty"`
 }
 
-type MonthSummary struct {
-	Month      int         `json:"month"`
-	Categories []*Category `json:"categories,omitempty"`
-	Total      *float64    `json:"total,omitempty"`
+type CategoryTotal struct {
+	Category string  `json:"category"`
+	Total    float64 `json:"total"`
+	Count    int     `json:"count"`
+}
+
+type MonthlyTotal struct {
+	Month int     `json:"month"`
+	Total float64 `json:"total"`
+	Count int     `json:"count"`
 }
 
 type Mutation struct {
+}
+
+type PageInfo struct {
+	HasNextPage     bool    `json:"hasNextPage"`
+	HasPreviousPage bool    `json:"hasPreviousPage"`
+	StartCursor     *string `json:"startCursor,omitempty"`
+	EndCursor       *string `json:"endCursor,omitempty"`
 }
 
 type Query struct {
@@ -24,6 +37,17 @@ type Query struct {
 type RangeInput struct {
 	StartDate string `json:"startDate"`
 	EndDate   string `json:"endDate"`
+}
+
+type TransactionConnection struct {
+	Edges      []*TransactionEdge `json:"edges"`
+	PageInfo   *PageInfo          `json:"pageInfo"`
+	TotalCount int                `json:"totalCount"`
+}
+
+type TransactionEdge struct {
+	Node   *Transaction `json:"node"`
+	Cursor string       `json:"cursor"`
 }
 
 type TransactionInput struct {

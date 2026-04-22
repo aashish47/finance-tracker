@@ -1,4 +1,4 @@
-import { cn } from "@/utils/conditional";
+import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
 import "./globals.css";
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 	description: "A dashboard to track finance",
 };
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export default function RootLayout({
 	children,
