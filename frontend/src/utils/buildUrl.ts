@@ -58,7 +58,7 @@ export const buildUrl = ({
 		params.set("sort", sort);
 	}
 
-	const url = `/home?${params.toString()}`;
+	const url = `?${params.toString()}`;
 
 	return url;
 };

@@ -21,7 +21,7 @@ import {
 import { fetcher } from "@/lib/data/fetcher";
 import { dateTag, lastDateTag, yearsTag, yearTag } from "@/lib/data/tags";
 
-interface FetchOptions {
+export interface FetchOptions {
 	userId: string;
 	accessToken: string;
 	cacheKey?: string;

@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
 import { buildUrl, UrlProps } from "@/utils/buildUrl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from "recharts";
 
 interface BarGraphProps {

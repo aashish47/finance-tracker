@@ -11,7 +11,7 @@ import { Query } from "@/graphql/generated/graphql";
 import { buildUrl, UrlProps } from "@/utils/buildUrl";
 import { UserMetadata } from "@supabase/supabase-js";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 
 interface NavbarProps {
 	userData?: UserMetadata;

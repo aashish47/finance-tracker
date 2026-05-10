@@ -3,7 +3,7 @@
 import { Calendar } from "@/components/ui/calendar";
 import { buildUrl, UrlProps } from "@/utils/buildUrl";
 import { format } from "date-fns";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 
 const CalendarClient = (props: UrlProps) => {
 	const { date, ...rest } = props;

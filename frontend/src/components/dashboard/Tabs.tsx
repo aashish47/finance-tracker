@@ -1,7 +1,7 @@
 "use client";
 
 import { buildUrl, UrlProps } from "@/utils/buildUrl";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 
 const Tabs = (props: UrlProps) => {
 	const { tab, ...rest } = props;

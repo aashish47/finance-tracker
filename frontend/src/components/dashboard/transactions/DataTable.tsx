@@ -26,7 +26,7 @@ import {
 	VisibilityState,
 } from "@tanstack/react-table";
 import { X } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 interface DataTableProps {

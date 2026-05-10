@@ -9,7 +9,7 @@ import {
 	SettingsIcon,
 	StarIcon,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "nextjs-toploader/app";
 
 const Sidebar = () => {
 	const router = useRouter();

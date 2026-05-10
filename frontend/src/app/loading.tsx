@@ -1,5 +1,5 @@
 const Loading = () => {
-	return <div>Loading...</div>;
+	return <div className="bg-inherit">Loading...</div>;
 };
 
 export default Loading;

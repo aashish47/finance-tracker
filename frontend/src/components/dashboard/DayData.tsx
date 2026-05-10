@@ -1,3 +1,5 @@
+"use client";
+
 import CalendarClient from "@/components/dashboard/CalendarClient";
 import { GetDaysDataQuery } from "@/graphql/generated/graphql";
 import { UrlProps } from "@/utils/buildUrl";

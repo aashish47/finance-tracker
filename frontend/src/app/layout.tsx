@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -23,7 +24,10 @@ export default function RootLayout({
 			suppressHydrationWarning
 			className={cn("font-sans", geist.variable, "dark")}
 		>
-			<body className={inter.className}>{children}</body>
+			<body className={inter.className}>
+				<NextTopLoader showSpinner={false} color="#7008e7" />
+				{children}
+			</body>
 		</html>
 	);
 }
