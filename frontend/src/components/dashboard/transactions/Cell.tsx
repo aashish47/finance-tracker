@@ -18,7 +18,10 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Query, Transaction } from "@/graphql/generated/graphql";
-import { deleteTransaction, updateTransactions } from "@/lib/actions";
+import {
+	deleteTransaction,
+	updateTransactions,
+} from "@/lib/actions/transaction-actions";
 import { Row } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { MoreHorizontal } from "lucide-react";
@@ -113,7 +116,7 @@ const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 					>
 						<DialogFooter>
 							<Button type="submit" disabled={updateLoading}>
-								{updateError ? "Updating..." : "Update"}
+								{updateLoading ? "Updating..." : "Update"}
 							</Button>
 							{updateError && (
 								<p className="text-red-500">{`Updation error: ${updateError}`}</p>

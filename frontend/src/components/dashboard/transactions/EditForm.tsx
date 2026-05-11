@@ -1,5 +1,5 @@
-import CategorySelect from "@/components/dashboard/forms/CategorySelect";
-import DatePicker from "@/components/dashboard/forms/DatePicker";
+import CategorySelect from "@/components/dashboard/form/CategorySelect";
+import DatePicker from "@/components/dashboard/form/DatePicker";
 import { formSchema } from "@/components/dashboard/TransactionForm";
 import {
 	Form,

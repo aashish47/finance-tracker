@@ -1,7 +1,7 @@
 "use client";
 
-import CategorySelect from "@/components/dashboard/forms/CategorySelect";
-import DatePicker from "@/components/dashboard/forms/DatePicker";
+import CategorySelect from "@/components/dashboard/form/CategorySelect";
+import DatePicker from "@/components/dashboard/form/DatePicker";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Query } from "@/graphql/generated/graphql";
-import { createTransaction } from "@/lib/actions";
+import { createTransaction } from "@/lib/actions/transaction-actions";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { useState } from "react";

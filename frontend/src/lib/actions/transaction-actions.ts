@@ -13,11 +13,8 @@ import {
 import { getSession, getUser } from "@/lib/auth";
 import { fetcher } from "@/lib/data/fetcher";
 import { dateTag, lastDateTag, yearsTag, yearTag } from "@/lib/data/tags";
-import { createClient } from "@/lib/supabase/server";
-import { Provider } from "@supabase/supabase-js";
 import { format } from "date-fns";
-import { revalidatePath, updateTag } from "next/cache";
-import { redirect } from "next/navigation";
+import { updateTag } from "next/cache";
 
 export const createTransaction = async (
 	variables: CreateTransactionMutationVariables,
@@ -91,61 +88,4 @@ export const deleteTransaction = async (
 	updateTag(dateTag(id, format(date, "yyyy-MM-dd")));
 
 	return { error: null };
-};
-
-export const login = async (formData: FormData) => {
-	const supabase = await createClient();
-
-	// type-casting here for convenience
-	// in practice, you should validate your inputs
-	const data = {
-		email: formData.get("email") as string,
-		password: formData.get("password") as string,
-	};
-
-	const { error } = await supabase.auth.signInWithPassword(data);
-
-	if (error) {
-		redirect("/error");
-	}
-
-	revalidatePath("/", "layout");
-	redirect("/");
-};
-
-export const signup = async (formData: FormData) => {
-	const supabase = await createClient();
-
-	// type-casting here for convenience
-	// in practice, you should validate your inputs
-	const data = {
-		email: formData.get("email") as string,
-		password: formData.get("password") as string,
-	};
-
-	const { error } = await supabase.auth.signUp(data);
-
-	if (error) {
-		redirect("/error");
-	}
-
-	revalidatePath("/", "layout");
-	redirect("/");
-};
-
-export const oauth = async (provider: Provider) => {
-	const supabase = await createClient();
-	const { data, error } = await supabase.auth.signInWithOAuth({
-		provider,
-		options: {
-			redirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/auth/callback/`,
-		},
-	});
-
-	if (data.url) {
-		redirect(data.url);
-	}
-	if (error) {
-		redirect("/error");
-	}
 };
