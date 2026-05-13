@@ -1,3 +1,6 @@
+import FormButton from "@/components/dashboard/form/FormButton";
+import FormContent from "@/components/dashboard/form/FormContent";
+import { TransactionFormValues } from "@/components/dashboard/TransactionForm";
 import EditForm from "@/components/dashboard/transactions/EditForm";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,14 +38,15 @@ interface CellProps<TData> {
 const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 	const transaction = row.original as Transaction;
 
-	const handleSubmit = async (data: {
-		item: string;
-		categoryID: string;
-		amount: number;
-		date: Date;
-	}) => {
-		setUpdateLoading(true);
-		const { error } = await updateTransactions(
+	enum Dialogs {
+		edit = "edit",
+		delete = "delete",
+	}
+
+	const [dialog, setDialog] = useState<Dialogs>();
+
+	const handleEditSubmit = async (data: TransactionFormValues) => {
+		await updateTransactions(
 			{
 				id: transaction.id,
 				input: {
@@ -54,23 +58,13 @@ const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 			},
 			transaction.date,
 		);
-		setUpdateLoading(false);
-		setUpdateError(error);
 	};
 
-	enum Dialogs {
-		edit = "edit",
-		delete = "delete",
-	}
-
-	const [dialog, setDialog] = useState<Dialogs>();
-	const [deleteLoading, setDeleteLoading] = useState(false);
-	const [deleteError, setDeleteError] = useState<null | string>(null);
-	const [updateLoading, setUpdateLoading] = useState(false);
-	const [updateError, setUpdateError] = useState<null | string>(null);
-
-	if (deleteLoading) return "Deleting...";
-	if (deleteError) return deleteError;
+	const handleDeleteSubmit = async () => {
+		await deleteTransaction({
+			id: transaction.id,
+		});
+	};
 	return (
 		<Dialog>
 			<DropdownMenu>
@@ -111,16 +105,11 @@ const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 					</DialogHeader>
 					<EditForm
 						transaction={transaction}
-						handleSubmit={handleSubmit}
+						handleSubmit={handleEditSubmit}
 						categories={categories}
 					>
 						<DialogFooter>
-							<Button type="submit" disabled={updateLoading}>
-								{updateLoading ? "Updating..." : "Update"}
-							</Button>
-							{updateError && (
-								<p className="text-red-500">{`Updation error: ${updateError}`}</p>
-							)}
+							<FormButton formType="update" type="submit" />
 						</DialogFooter>
 					</EditForm>
 				</DialogContent>
@@ -133,21 +122,17 @@ const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 							delete this file from our servers?
 						</DialogDescription>
 					</DialogHeader>
-					<DialogFooter>
-						<Button
-							onClick={async () => {
-								setDeleteLoading(true);
-								const { error } = await deleteTransaction({
-									id: transaction.id,
-								});
-								setDeleteLoading(false);
-								setDeleteError(error);
-							}}
-							type="submit"
-						>
-							Confirm
-						</Button>
-					</DialogFooter>
+					<form
+						action={async () => {
+							await handleDeleteSubmit();
+						}}
+					>
+						<FormContent>
+							<DialogFooter>
+								<FormButton formType="delete" label="Delete" type="submit" />
+							</DialogFooter>
+						</FormContent>
+					</form>
 				</DialogContent>
 			)}
 		</Dialog>
