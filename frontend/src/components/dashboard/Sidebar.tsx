@@ -1,18 +1,8 @@
-"use client";
-
+import LogoutButton from "@/components/dashboard/LogoutButton";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/client";
-import {
-	BellIcon,
-	HomeIcon,
-	LogOutIcon,
-	SettingsIcon,
-	StarIcon,
-} from "lucide-react";
-import { useRouter } from "nextjs-toploader/app";
+import { BellIcon, HomeIcon, SettingsIcon, StarIcon } from "lucide-react";
 
 const Sidebar = () => {
-	const router = useRouter();
 	return (
 		<div className="flex h-12 w-screen items-center justify-around gap-8 border p-4 md:h-full md:w-12 md:flex-col md:rounded-r-3xl md:px-3 md:py-20">
 			<Button variant={"ghost"} className="w-6 md:w-full">
@@ -30,17 +20,7 @@ const Sidebar = () => {
 			</Button>
 
 			<div className="hidden grow md:block"></div>
-			<Button
-				onClick={async () => {
-					const supabase = createClient();
-					await supabase.auth.signOut();
-					router.push("/");
-				}}
-				variant={"ghost"}
-				className="w-6 md:w-full"
-			>
-				<LogOutIcon />
-			</Button>
+			<LogoutButton />
 		</div>
 	);
 };

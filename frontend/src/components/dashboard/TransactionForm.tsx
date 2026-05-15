@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { PropsWithChildren, useState } from "react";
+import { toast } from "sonner";
 import z from "zod";
 
 export const formSchema = z.object({
@@ -96,6 +97,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 		// Submit
 		if (mode === "edit" && customOnSubmit) {
 			await customOnSubmit(result.data);
+			toast.success("Transaction updated successfully", {
+				description: format(new Date(), "PPPPpp"),
+			});
 		} else {
 			await createTransaction({
 				input: {
@@ -105,6 +109,9 @@ const TransactionForm: React.FC<TransactionFormProps> = ({
 					date: format(result.data.date, "yyyy-MM-dd"),
 					amount: Number(result.data.amount),
 				},
+			});
+			toast.success("Transaction created successfully", {
+				description: format(new Date(), "PPPPpp"),
 			});
 			// Reset form on successful create
 			setFormData({

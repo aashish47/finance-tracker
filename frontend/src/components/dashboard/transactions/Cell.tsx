@@ -29,6 +29,7 @@ import { Row } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { MoreHorizontal } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface CellProps<TData> {
 	row: Row<TData>;
@@ -63,6 +64,9 @@ const Cell = <TData,>({ row, categories }: CellProps<TData>) => {
 	const handleDeleteSubmit = async () => {
 		await deleteTransaction({
 			id: transaction.id,
+		});
+		toast.success("Transaction deleted successfully", {
+			description: format(new Date(), "PPPPpp"),
 		});
 	};
 	return (

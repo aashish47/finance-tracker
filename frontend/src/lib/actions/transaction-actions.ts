@@ -36,7 +36,6 @@ export const createTransaction = async (
 	updateTag(lastDateTag(id));
 	updateTag(dateTag(id, format(date, "yyyy-MM-dd")));
 	updateTag(yearTag(id, format(date, "yyyy")));
-	return { error: null };
 };
 
 export const updateTransactions = async (
@@ -63,8 +62,6 @@ export const updateTransactions = async (
 	updateTag(dateTag(id, format(date, "yyyy-MM-dd")));
 	updateTag(yearTag(id, oldYear));
 	updateTag(dateTag(id, format(oldDate, "yyyy-MM-dd")));
-
-	return { error: null };
 };
 
 export const deleteTransaction = async (
@@ -86,6 +83,4 @@ export const deleteTransaction = async (
 	updateTag(lastDateTag(id));
 	updateTag(yearTag(id, format(date, "yyyy")));
 	updateTag(dateTag(id, format(date, "yyyy-MM-dd")));
-
-	return { error: null };
 };

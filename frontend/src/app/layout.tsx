@@ -1,3 +1,5 @@
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
@@ -25,8 +27,11 @@ export default function RootLayout({
 			className={cn("font-sans", geist.variable, "dark")}
 		>
 			<body className={inter.className}>
-				<NextTopLoader showSpinner={false} color="#7008e7" />
-				{children}
+				<TooltipProvider>
+					<NextTopLoader showSpinner={false} color="#7008e7" />
+					{children}
+				</TooltipProvider>
+				<Toaster richColors closeButton />
 			</body>
 		</html>
 	);
