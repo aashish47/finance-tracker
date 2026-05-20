@@ -4,7 +4,6 @@ export interface UrlProps {
 	year: number;
 	month?: number;
 	category?: string;
-	tab?: number;
 	date: string;
 	page: number;
 	limit: number;
@@ -16,7 +15,6 @@ export const buildUrl = ({
 	year,
 	month,
 	category,
-	tab,
 	date,
 	page,
 	limit,
@@ -32,10 +30,6 @@ export const buildUrl = ({
 
 	if (category) {
 		params.set("category", category);
-	}
-
-	if (tab) {
-		params.set("tab", tab.toString());
 	}
 
 	if (date) {

@@ -17,9 +17,7 @@ const parseCategory = (category: SearchParam) => {
 	return category && typeof category === "string" ? category : undefined;
 };
 
-const parseTab = (tab: SearchParam) => {
-	return tab && typeof tab === "string" ? parseInt(tab) : 1;
-};
+// Tab parameter removed — navigation now uses client-side anchors
 
 const parseDate = (date: SearchParam) => {
 	return date && typeof date === "string" ? date : new Date().toString();
@@ -48,13 +46,12 @@ const parseSort = (sort: SearchParam) => {
 };
 
 const parseSearchParams = (searchParams: Record<string, SearchParam>) => {
-	const { year, month, category, tab, date, page, limit, search, sort } =
+	const { year, month, category, date, page, limit, search, sort } =
 		searchParams;
 	return {
 		year: parseYear(year),
 		month: parseMonth(month),
 		category: parseCategory(category),
-		tab: parseTab(tab),
 		date: parseDate(date),
 		page: parsePage(page),
 		limit: parseLimit(limit),
