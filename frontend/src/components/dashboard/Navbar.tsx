@@ -16,7 +16,8 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Query } from "@/graphql/generated/graphql";
-import { buildUrl, UrlProps } from "@/utils/buildUrl";
+import { UrlProps } from "@/types/types";
+import { buildUrl } from "@/utils/buildUrl";
 import { UserMetadata } from "@supabase/supabase-js";
 import { ListIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";

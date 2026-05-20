@@ -1,18 +1,31 @@
-import { UrlFetchProps } from "@/app/page";
 import PieGraph, {
 	CategoryTotalsForPie,
 } from "@/components/dashboard/PieGraph";
 import { CategoryTotal } from "@/graphql/generated/graphql";
+import { getSession, getUser } from "@/lib/auth";
+import { parseSearchParamsWithDefaults } from "@/lib/data/parseSearchParamsHelper";
 import { getCategoriesList, getCategoryTotals } from "@/lib/data/queries";
+import { SearchParamsType, UrlFetchProps } from "@/types/types";
 import { Suspense } from "react";
 
-async function PieGraphContent(props: UrlFetchProps) {
-	const { month, ...rest } = props;
-	const { category } = props;
+const PieGraphContent: React.FC<SearchParamsType> = async ({
+	searchParams,
+}) => {
+	const [user, session] = await Promise.all([getUser(), getSession()]);
+	const fetchOptions = { userId: user.id, accessToken: session.access_token };
+
+	const urlProps = await parseSearchParamsWithDefaults(
+		searchParams,
+		fetchOptions,
+	);
+
+	const urlFetchProps: UrlFetchProps = { ...urlProps, ...fetchOptions };
+	const { month, ...rest } = urlFetchProps;
+	const { category } = urlFetchProps;
 	const monthParam = month !== undefined ? month + 1 : undefined;
 
 	const [Categories, categoryTotals] = await Promise.all([
-		getCategoriesList({ ...props }),
+		getCategoriesList({ ...urlFetchProps }),
 		getCategoryTotals({
 			month: monthParam,
 			...rest,
@@ -49,19 +62,20 @@ async function PieGraphContent(props: UrlFetchProps) {
 			data={categoryTotalsForPie}
 			total={total}
 			activeIndex={activeIndex}
-			{...props}
+			{...urlFetchProps}
 		/>
 	);
-}
-
-export default function PieGraphWrapper(props: UrlFetchProps) {
+};
+const PieGraphWrapper: React.FC<SearchParamsType> = ({ searchParams }) => {
 	return (
 		<Suspense
 			fallback={
 				<div className="bg-muted h-full w-full animate-pulse rounded-lg" />
 			}
 		>
-			<PieGraphContent {...props} />
+			<PieGraphContent searchParams={searchParams} />
 		</Suspense>
 	);
-}
+};
+
+export default PieGraphWrapper;

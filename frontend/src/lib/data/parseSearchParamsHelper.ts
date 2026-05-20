@@ -1,4 +1,5 @@
-import { FetchOptions, getLastDate } from "@/lib/data/queries";
+import { getLastDate } from "@/lib/data/queries";
+import { FetchOptions } from "@/types/types";
 import parseSearchParams from "@/utils/parseSearchParams";
 
 export async function parseSearchParamsWithDefaults(

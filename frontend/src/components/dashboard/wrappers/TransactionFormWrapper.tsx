@@ -1,21 +1,39 @@
-import { UrlFetchProps } from "@/app/page";
 import TransactionForm from "@/components/dashboard/TransactionForm";
+import { getSession, getUser } from "@/lib/auth";
+import { parseSearchParamsWithDefaults } from "@/lib/data/parseSearchParamsHelper";
 import { getCategoriesList } from "@/lib/data/queries";
+import { SearchParamsType, UrlFetchProps } from "@/types/types";
 import { Suspense } from "react";
 
-async function TransactionFormContent(props: UrlFetchProps) {
-	const Categories = await getCategoriesList({ ...props });
-	return <TransactionForm categories={Categories} />;
-}
+const TransactionFormContent: React.FC<SearchParamsType> = async ({
+	searchParams,
+}) => {
+	const [user, session] = await Promise.all([getUser(), getSession()]);
+	const fetchOptions = { userId: user.id, accessToken: session.access_token };
 
-export default function TransactionFormWrapper(props: UrlFetchProps) {
+	const urlProps = await parseSearchParamsWithDefaults(
+		searchParams,
+		fetchOptions,
+	);
+
+	const urlFetchProps: UrlFetchProps = { ...urlProps, ...fetchOptions };
+
+	const Categories = await getCategoriesList({ ...urlFetchProps });
+	return <TransactionForm categories={Categories} />;
+};
+
+const TransactionFormWrapper: React.FC<SearchParamsType> = ({
+	searchParams,
+}) => {
 	return (
 		<Suspense
 			fallback={
 				<div className="bg-muted h-full w-full animate-pulse rounded-lg" />
 			}
 		>
-			<TransactionFormContent {...props} />
+			<TransactionFormContent searchParams={searchParams} />
 		</Suspense>
 	);
-}
+};
+
+export default TransactionFormWrapper;

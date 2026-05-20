@@ -2,7 +2,7 @@
 
 import CalendarClient from "@/components/dashboard/CalendarClient";
 import { GetDaysDataQuery } from "@/graphql/generated/graphql";
-import { UrlProps } from "@/utils/buildUrl";
+import { UrlProps } from "@/types/types";
 import { capitalize } from "@/utils/capitalize";
 import { formatCurrency } from "@/utils/formatCurrency";
 

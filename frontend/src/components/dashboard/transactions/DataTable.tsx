@@ -17,7 +17,8 @@ import {
 	GetTransactionsPaginatedQuery,
 	Query,
 } from "@/graphql/generated/graphql";
-import { buildUrl, UrlProps } from "@/utils/buildUrl";
+import { UrlProps } from "@/types/types";
+import { buildUrl } from "@/utils/buildUrl";
 import {
 	ColumnFiltersState,
 	flexRender,

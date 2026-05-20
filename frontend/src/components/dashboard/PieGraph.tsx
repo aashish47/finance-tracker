@@ -7,7 +7,8 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
-import { buildUrl, UrlProps } from "@/utils/buildUrl";
+import { UrlProps } from "@/types/types";
+import { buildUrl } from "@/utils/buildUrl";
 import { useRouter } from "nextjs-toploader/app";
 import { Label, Legend, Pie, PieChart, Sector } from "recharts";
 import { PieSectorDataItem } from "recharts/types/polar/Pie";

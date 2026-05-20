@@ -20,12 +20,7 @@ import {
 } from "@/graphql/generated/graphql";
 import { fetcher } from "@/lib/data/fetcher";
 import { dateTag, lastDateTag, yearsTag, yearTag } from "@/lib/data/tags";
-
-export interface FetchOptions {
-	userId: string;
-	accessToken: string;
-	cacheKey?: string;
-}
+import { FetchOptions } from "@/types/types";
 
 export const getCategoriesList = async (params: FetchOptions) => {
 	const { accessToken, cacheKey } = params;

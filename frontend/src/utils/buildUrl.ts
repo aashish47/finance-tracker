@@ -1,15 +1,5 @@
+import { UrlProps } from "@/types/types";
 import { format } from "date-fns";
-
-export interface UrlProps {
-	year: number;
-	month?: number;
-	category?: string;
-	date: string;
-	page: number;
-	limit: number;
-	search?: string;
-	sort?: string;
-}
 
 export const buildUrl = ({
 	year,

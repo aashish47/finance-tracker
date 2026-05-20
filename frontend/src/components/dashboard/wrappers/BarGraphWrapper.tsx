@@ -1,13 +1,26 @@
-import { UrlFetchProps } from "@/app/page";
 import BarGraph from "@/components/dashboard/BarGraph";
+import { getSession, getUser } from "@/lib/auth";
+import { parseSearchParamsWithDefaults } from "@/lib/data/parseSearchParamsHelper";
 import { getCategoriesList, getMonthlyTotals } from "@/lib/data/queries";
+import { SearchParamsType, UrlFetchProps } from "@/types/types";
 import { format } from "date-fns";
 import { Suspense } from "react";
 
-async function BarGraphContent(props: UrlFetchProps) {
-	const { category, ...rest } = props;
+const BarGraphContent: React.FC<SearchParamsType> = async ({
+	searchParams,
+}) => {
+	const [user, session] = await Promise.all([getUser(), getSession()]);
+	const fetchOptions = { userId: user.id, accessToken: session.access_token };
 
-	const Categories = await getCategoriesList({ ...props });
+	const urlProps = await parseSearchParamsWithDefaults(
+		searchParams,
+		fetchOptions,
+	);
+
+	const urlFetchProps: UrlFetchProps = { ...urlProps, ...fetchOptions };
+	const { category, ...rest } = urlFetchProps;
+
+	const Categories = await getCategoriesList({ ...urlFetchProps });
 	const categoryID = Categories?.find((c) => c?.name === category)?.id;
 	const monthlyTotals = await getMonthlyTotals({
 		categoryID,
@@ -19,17 +32,19 @@ async function BarGraphContent(props: UrlFetchProps) {
 		amount: m.total ?? 0,
 	}));
 
-	return <BarGraph monthlySummary={monthly} {...props} />;
-}
+	return <BarGraph monthlySummary={monthly} {...urlFetchProps} />;
+};
 
-export default function BarGraphWrapper(props: UrlFetchProps) {
+const BarGraphWrapper: React.FC<SearchParamsType> = ({ searchParams }) => {
 	return (
 		<Suspense
 			fallback={
 				<div className="bg-muted h-full w-full animate-pulse rounded-lg" />
 			}
 		>
-			<BarGraphContent {...props} />
+			<BarGraphContent searchParams={searchParams} />
 		</Suspense>
 	);
-}
+};
+
+export default BarGraphWrapper;

@@ -7,7 +7,8 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
-import { buildUrl, UrlProps } from "@/utils/buildUrl";
+import { UrlProps } from "@/types/types";
+import { buildUrl } from "@/utils/buildUrl";
 import { useRouter } from "nextjs-toploader/app";
 import { Bar, BarChart, CartesianGrid, Rectangle, XAxis } from "recharts";
 
