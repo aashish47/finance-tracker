@@ -2,27 +2,20 @@
 
 Finance Tracker is a simple tool to help you manage your personal finances.
 
+<img width="2560" height="1280" alt="localhost_3000__year=2023 month=5 date=2023-05-28 page=1 limit=20" src="https://github.com/user-attachments/assets/c9389ed8-a6af-4348-bcbb-8757bd4a357f" />
 
-https://github.com/user-attachments/assets/139153aa-8511-401e-ae97-e2d46a3457fd
-
-
-   
-![localhost_3000_home_year=2023 month=2 date=2025-02-07 (2)](https://github.com/user-attachments/assets/a1ccbcb8-b60b-4bb4-b316-2611772a84fe)
-
-
-
-
-
+https://github.com/user-attachments/assets/289fc978-e763-4a4d-a627-b57585bd9e88
 
 ## Installation
-
 
 ### Prerequisites
 
 Before you begin, ensure you have met the following requirements:
 
-- **Node.js**: Version 20.11.1 (Download and install [Node.js](https://nodejs.org/) if you haven't already)
-- **Go**: Version 1.22.0 (Download and install [Go](https://go.dev/) if you haven't already)
+- **Node.js**: Version 24.10.0 (Download and install [Node.js](https://nodejs.org/) if you haven't already)
+- **Go**: Version
+
+    1.25.4 (Download and install [Go](https://go.dev/) if you haven't already)
 
 ### Clone the repository
 
@@ -34,24 +27,23 @@ git clone https://github.com/aashish47/finance-tracker.git
 
 Before running the Finance Tracker project, you'll need to set up Supabase for database management and Google Auth for user authentication. Follow these steps to configure Supabase and obtain the necessary keys:
 
-1. **Set up Supabase Project and Google Auth**: 
-   - Create a Supabase project and enable Google Auth.
-   - Obtain the Supabase project URL, API key, Google Client ID, and Client Secret.
-   - Add `http://localhost:3000` as an allowed redirect URL in Supabase Auth settings. (authentication -> url configuration -> site url)
+1. **Set up Supabase Project and Google Auth**:
+    - Create a Supabase project and enable Google Auth.
+    - Obtain the Supabase project URL, API key, Google Client ID, and Client Secret.
+    - Add `http://localhost:3000` as an allowed redirect URL in Supabase Auth settings. (authentication -> url configuration -> site url)
 
-   For detailed instructions, refer to the [Supabase Authentication Guide](https://supabase.com/docs/guides/auth/auth-deep-dive/auth-google-oauth).
+    For detailed instructions, refer to the [Supabase Authentication Guide](https://supabase.com/docs/guides/auth/auth-deep-dive/auth-google-oauth).
 
 2. **Configure Supabase Database**:
-   - When setting up your Supabase database, ensure to choose connection pooling to session.
-   - Set the pool size to 35 for optimal performance.
+    - When setting up your Supabase database, ensure to choose connection pooling to session.
+    - Set the pool size to 35 for optimal performance.
 
-   For more information on configuring Supabase database connection pooling, refer to the [Supabase Documentation](https://supabase.com/docs).
-
+    For more information on configuring Supabase database connection pooling, refer to the [Supabase Documentation](https://supabase.com/docs).
 
 3. **Seed the database(optional)**:
-   - Open the Supabase SQL editor and connect to your project's PostgreSQL database.
-   - Open the [seed.sql](seed.sql) file provided in the project
-   - Copy and paste the SQL queries from seed.sql into the SQL editor and execute them to seed the database.
+    - Open the Supabase SQL editor and connect to your project's PostgreSQL database.
+    - Open the [seed.sql](seed.sql) file provided in the project
+    - Copy and paste the SQL queries from seed.sql into the SQL editor and execute them to seed the database.
 
 ### Rename `.env.example` files
 
@@ -81,6 +73,7 @@ npm run dev
 cd finance-tracker/backend
 go run server.go
 ```
+
 Open `http://localhost:3000` with your browser to see the result.
 
 ## Contribution
