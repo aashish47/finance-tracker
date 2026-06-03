@@ -1,10 +1,29 @@
 DO $$
 DECLARE
-    user_id TEXT := 'replace with your id/sub provided in session object';
+    user_id TEXT := 'd486af78-39dc-4012-b7e6-647a65add65f';
 BEGIN
+    INSERT INTO categories (name)
+    VALUES
+    ('Grocery'),
+    ('Education'),
+    ('Health'),
+    ('Miscellaneous'),
+    ('Food'),
+    ('Transportation'),
+    ('Personal'),
+    ('Entertainment'),
+    ('Tax'),
+    ('Utility'),
+    ('Rent'),
+    ('Debt'),
+    ('Gift'),
+    ('Insurance'),
+    ('Electronics'),
+    ('Repair');
+
     INSERT INTO transactions (item, amount, date, is_income, category_id, user_id)
     VALUES 
-    ( 'Apples', 150, '2022-01-12', False, 1, user_id),
+    ('Apples', 150, '2022-01-12', False, 1, user_id),
     ('Mobile Bill', 80, '2022-01-25', False, 10, user_id),
     ('Painkillers', 30, '2022-01-18', False, 3, user_id),
     ('Shampoo', 20, '2022-01-09', False, 7, user_id),

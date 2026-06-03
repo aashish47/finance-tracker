@@ -1,6 +1,7 @@
 package config
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
@@ -9,6 +10,12 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+//go:embed seed.sql
+var SeedSQL string
+
+//go:embed schema.sql
+var SchemaSQL string
 
 var db *gorm.DB
 
@@ -30,7 +37,34 @@ func InitDB() *gorm.DB {
 		log.Print("Database Connected")
 	}
 
-	db.AutoMigrate(&models.Transaction{}, &models.Category{})
+	err = db.AutoMigrate(&models.Transaction{}, &models.Category{})
+
+	if err != nil {
+		log.Fatalf("GORM AutoMigrate failed: %v", err)
+	}
+
+	log.Println("AutoMigrate successful")
+
+	// 2. Execute your manual database-level changes
+	log.Println("Applying custom indexes, triggers, and views...")
+	err = db.Exec(SchemaSQL).Error
+	if err != nil {
+		log.Fatalf("Failed to apply custom database schema: %v", err)
+	}
+
+	log.Println("Database schema is fully up to date!")
+
+	seed := os.Getenv(("SEED"))
+	if seed == "true" {
+		log.Println("Excuting seed.sql script...")
+
+		if err := db.Exec(SeedSQL).Error; err != nil {
+			log.Fatalf("Failed to execute seed.sql: %v", err)
+		}
+
+		log.Println("Database successfully seeded! Exiting seeder task.")
+		// os.Exit(0)
+	}
 
 	return db
 }
