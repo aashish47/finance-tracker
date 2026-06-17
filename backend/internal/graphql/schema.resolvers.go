@@ -11,8 +11,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/aashish47/finance-tracker/backend/graphql/model"
-	"github.com/aashish47/finance-tracker/backend/utils"
+	"github.com/aashish47/finance-tracker/backend/internal/graphql/model"
+	"github.com/aashish47/finance-tracker/backend/internal/platform/utils"
 	"gorm.io/gorm"
 )
 

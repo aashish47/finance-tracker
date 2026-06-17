@@ -1,0 +1,59 @@
+version: "3"
+
+vars:
+    BINARY_DIR: bin
+    BINARY_NAME: server
+    BINARY_EXT: '{{if eq OS "windows"}}.exe{{else}}{{end}}'
+    BINARY_PATH: "{{.BINARY_DIR}}/{{.BINARY_NAME}}{{.BINARY_EXT}}"
+
+tasks:
+    # 1. Default task: Now runs the production binary (builds it first if missing)
+    default:
+        desc: Builds and runs the production binary executable
+        deps: [build]
+        cmds:
+            - echo "Running production binary..."
+            - "{{.BINARY_PATH}}"
+
+    # 2. Run the server in development mode with seeding enabled
+    dev:
+        desc: Starts the development server with database seeding turned on
+        env:
+            SEED: "true"
+        cmds:
+            - go run ./cmd/server
+
+    # 3. Run the source code cleanly without overwriting/seeding data
+    run:
+        desc: Runs the Go source code normally without executing seed.sql
+        env:
+            SEED: "false"
+        cmds:
+            - go run ./cmd/server
+
+    # 4. Compile your application into a production binary
+    build:
+        desc: Compiles the Go source code into a standalone binary
+        cmds:
+            - echo "Compiling binary for {{OS}}..."
+            - go build -tags netgo -ldflags "-s -w" -o {{.BINARY_PATH}} ./cmd/server
+        generates:
+            - "{{.BINARY_PATH}}"
+
+    # 5. Run tests across all of your neat packages
+    test:
+        desc: Runs unit tests recursively across platform and modules
+        cmds:
+            - go test -v ./...
+
+    # 6. Clean up your build workspace
+    clean:
+        desc: Removes build artifacts and temporary binaries
+        cmds:
+            - '{{if eq OS "windows"}}powershell -Command "If (Test-Path {{.BINARY_DIR}}) { Remove-Item -Recurse -Force {{.BINARY_DIR}} }"{{else}}rm -rf {{.BINARY_DIR}}{{end}}'
+
+    # 7. Tidy up your go.mod dependencies
+    tidy:
+        desc: Syncs and cleans up unused dependencies in go.mod
+        cmds:
+            - go mod tidy

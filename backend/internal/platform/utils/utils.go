@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/aashish47/finance-tracker/backend/middleware"
+	"github.com/aashish47/finance-tracker/backend/internal/platform/middleware"
 	"github.com/dgrijalva/jwt-go"
 )
 

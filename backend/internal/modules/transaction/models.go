@@ -1,7 +1,9 @@
-package models
+package transaction
 
 import (
 	"time"
+
+	"github.com/aashish47/finance-tracker/backend/internal/modules/category"
 )
 
 type Transaction struct {
@@ -11,6 +13,6 @@ type Transaction struct {
 	Date       time.Time
 	IsIncome   bool
 	CategoryID uint
-	Category   Category
+	Category   category.Category
 	UserId     string
 }

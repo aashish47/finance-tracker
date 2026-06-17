@@ -4,7 +4,7 @@ schema:
 
 # Where should the generated server code go?
 exec:
-    filename: graphql/generated.go
+    filename: internal/graphql/generated.go
     package: graphql
 
 # Uncomment to enable federation
@@ -14,7 +14,7 @@ exec:
 
 # Where should any generated models go?
 model:
-    filename: graphql/model/models_gen.go
+    filename: internal/graphql/model/models_gen.go
     package: model
 
 # Where should the resolver implementations go?
@@ -66,7 +66,7 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-    - "github.com/aashish47/finance-tracker/backend/graphql/model"
+    - "github.com/aashish47/finance-tracker/backend/internal/graphql/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
