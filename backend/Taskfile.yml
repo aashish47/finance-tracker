@@ -57,3 +57,10 @@ tasks:
         desc: Syncs and cleans up unused dependencies in go.mod
         cmds:
             - go mod tidy
+
+    # 8. Run the code generation tools (like gqlgen)
+    generate:
+        desc: Triggers automatic code generation across your packages
+        cmds:
+            - echo "Running code generation..."
+            - go generate ./...

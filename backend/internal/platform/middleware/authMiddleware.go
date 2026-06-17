@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Regex to find the name after 'query', 'mutation', or 'subscription'

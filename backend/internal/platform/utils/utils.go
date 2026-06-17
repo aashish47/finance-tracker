@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/aashish47/finance-tracker/backend/internal/platform/middleware"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func GetUserIDFromContext(ctx context.Context) (string, error) {
