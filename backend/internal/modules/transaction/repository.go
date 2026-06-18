@@ -9,16 +9,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type TransactionRepository struct {
+// repository implements Repository interface
+type repository struct {
 	db *gorm.DB
 }
 
-func NewTransactionRepository(db *gorm.DB) *TransactionRepository {
-	return &TransactionRepository{db: db}
+func NewRepository(db *gorm.DB) Repository {
+	return &repository{db: db}
 }
 
 // CreateTransaction creates a new transaction in the database
-func (r *TransactionRepository) CreateTransaction(transaction *model.Transaction) (*model.Transaction, error) {
+func (r *repository) CreateTransaction(transaction *model.Transaction) (*model.Transaction, error) {
 	if err := r.db.Create(transaction).Error; err != nil {
 		return nil, err
 	}
@@ -26,7 +27,7 @@ func (r *TransactionRepository) CreateTransaction(transaction *model.Transaction
 }
 
 // UpdateTransaction updates an existing transaction
-func (r *TransactionRepository) UpdateTransaction(id int, input model.UpdateTransactionInput) (*model.Transaction, error) {
+func (r *repository) UpdateTransaction(id int, input model.UpdateTransactionInput) (*model.Transaction, error) {
 	transaction := model.Transaction{}
 
 	if err := r.db.First(&transaction, id).Error; err != nil {
@@ -58,7 +59,7 @@ func (r *TransactionRepository) UpdateTransaction(id int, input model.UpdateTran
 }
 
 // DeleteTransaction deletes a transaction from the database
-func (r *TransactionRepository) DeleteTransaction(id int) (*model.Transaction, error) {
+func (r *repository) DeleteTransaction(id int) (*model.Transaction, error) {
 	transaction := model.Transaction{}
 
 	if err := r.db.Where("id = ?", id).First(&transaction).Error; err != nil {
@@ -73,7 +74,7 @@ func (r *TransactionRepository) DeleteTransaction(id int) (*model.Transaction, e
 }
 
 // GetTransactions retrieves all transactions for a user with optional date range filter
-func (r *TransactionRepository) GetTransactions(userID string, rangeArg *model.RangeInput) ([]*model.Transaction, error) {
+func (r *repository) GetTransactions(userID string, rangeArg *model.RangeInput) ([]*model.Transaction, error) {
 	transactions := []*model.Transaction{}
 	query := r.db.Where("user_id = ?", userID)
 
@@ -91,7 +92,7 @@ func (r *TransactionRepository) GetTransactions(userID string, rangeArg *model.R
 }
 
 // GetTransaction retrieves a single transaction by ID for a specific user
-func (r *TransactionRepository) GetTransaction(id int, userID string) (*model.Transaction, error) {
+func (r *repository) GetTransaction(id int, userID string) (*model.Transaction, error) {
 	transaction := model.Transaction{}
 
 	if err := r.db.Preload("Category").Where("id = ? AND user_id = ?", id, userID).First(&transaction).Error; err != nil {
@@ -102,7 +103,7 @@ func (r *TransactionRepository) GetTransaction(id int, userID string) (*model.Tr
 }
 
 // GetCategoryTotals retrieves aggregated category totals for a specific year, optionally filtered by month and search
-func (r *TransactionRepository) GetCategoryTotals(userID string, year int, month *int, search *string) ([]*model.CategoryTotal, error) {
+func (r *repository) GetCategoryTotals(userID string, year int, month *int, search *string) ([]*model.CategoryTotal, error) {
 	var rows []struct {
 		Category string  `gorm:"column:category"`
 		Total    float64 `gorm:"column:total"`
@@ -140,7 +141,7 @@ func (r *TransactionRepository) GetCategoryTotals(userID string, year int, month
 }
 
 // GetMonthlyTotals retrieves monthly aggregated totals for a specific year, optionally filtered by category and search
-func (r *TransactionRepository) GetMonthlyTotals(userID string, year int, categoryID *int, search *string) ([]*model.MonthlyTotal, error) {
+func (r *repository) GetMonthlyTotals(userID string, year int, categoryID *int, search *string) ([]*model.MonthlyTotal, error) {
 	var rows []struct {
 		Month int     `gorm:"column:month"`
 		Total float64 `gorm:"column:total"`
@@ -182,7 +183,7 @@ func (r *TransactionRepository) GetMonthlyTotals(userID string, year int, catego
 }
 
 // GetTransactionsPaginated retrieves paginated transactions with filtering and sorting options
-func (r *TransactionRepository) GetTransactionsPaginated(userID string, year int, month *int, categoryID *int, page *int, limit *int, search *string, sort *string) (*model.TransactionConnection, error) {
+func (r *repository) GetTransactionsPaginated(userID string, year int, month *int, categoryID *int, page *int, limit *int, search *string, sort *string) (*model.TransactionConnection, error) {
 	p := 1
 	l := 20
 	if page != nil && *page > 0 {
@@ -261,7 +262,7 @@ func (r *TransactionRepository) GetTransactionsPaginated(userID string, year int
 }
 
 // GetLastTransactionDate retrieves the most recent transaction date for a user
-func (r *TransactionRepository) GetLastTransactionDate(userID string) (*string, error) {
+func (r *repository) GetLastTransactionDate(userID string) (*string, error) {
 	transaction := &model.Transaction{}
 	var lastDate time.Time
 
@@ -278,7 +279,7 @@ func (r *TransactionRepository) GetLastTransactionDate(userID string) (*string, 
 }
 
 // GetTotal calculates the total sum of transactions for a user with optional date range filter
-func (r *TransactionRepository) GetTotal(userID string, rangeArg *model.RangeInput) (*float64, error) {
+func (r *repository) GetTotal(userID string, rangeArg *model.RangeInput) (*float64, error) {
 	var total float64
 	query := r.db.Model(&model.Transaction{}).Where("user_id = ?", userID)
 
@@ -294,7 +295,7 @@ func (r *TransactionRepository) GetTotal(userID string, rangeArg *model.RangeInp
 }
 
 // GetCategoryForTransaction fetches the category associated with a transaction
-func (r *TransactionRepository) GetCategoryForTransaction(categoryID int) (*model.Category, error) {
+func (r *repository) GetCategoryForTransaction(categoryID int) (*model.Category, error) {
 	category := &model.Category{}
 	if err := r.db.First(&category, categoryID).Error; err != nil {
 		return nil, err

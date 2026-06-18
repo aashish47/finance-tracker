@@ -11,13 +11,13 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	TransactionRepo *transaction.TransactionRepository
-	CategoryRepo    *category.CategoryRepository
+	TransactionService *transaction.Service
+	CategoryService    *category.Service
 }
 
-func NewResolver(transactionRepo *transaction.TransactionRepository, categoryRepo *category.CategoryRepository) *Resolver {
+func NewResolver(transactionService *transaction.Service, categoryService *category.Service) *Resolver {
 	return &Resolver{
-		TransactionRepo: transactionRepo,
-		CategoryRepo:    categoryRepo,
+		TransactionService: transactionService,
+		CategoryService:    categoryService,
 	}
 }

@@ -24,11 +24,15 @@ func main() {
 	db := database.InitDB(config.LoadDBConfig())
 
 	// Initialize repositories
-	transactionRepo := transaction.NewTransactionRepository(db)
-	categoryRepo := category.NewCategoryRepository(db)
+	transactionRepo := transaction.NewRepository(db)
+	categoryRepo := category.NewRepository(db)
 
-	// Create resolver with repositories
-	resolver := graphql.NewResolver(transactionRepo, categoryRepo)
+	// Initialize services
+	transactionService := transaction.NewService(transactionRepo)
+	categoryService := category.NewService(categoryRepo)
+
+	// Create resolver with services
+	resolver := graphql.NewResolver(transactionService, categoryService)
 
 	port := os.Getenv("PORT")
 	origin := "https://fintrack-1scr.onrender.com"

@@ -7,16 +7,17 @@ import (
 	"gorm.io/gorm"
 )
 
-type CategoryRepository struct {
+// repository implements CategoryRepository interface
+type repository struct {
 	db *gorm.DB
 }
 
-func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
-	return &CategoryRepository{db: db}
+func NewRepository(db *gorm.DB) Repository {
+	return &repository{db: db}
 }
 
 // GetCategoryTransactions retrieves all transactions for a specific category with optional date range filter
-func (r *CategoryRepository) GetCategoryTransactions(categoryID int, rangeArg *model.RangeInput) ([]*model.Transaction, error) {
+func (r *repository) GetCategoryTransactions(categoryID int, rangeArg *model.RangeInput) ([]*model.Transaction, error) {
 	transactions := []*model.Transaction{}
 	query := r.db.Where("category_id = ?", categoryID)
 
@@ -32,7 +33,7 @@ func (r *CategoryRepository) GetCategoryTransactions(categoryID int, rangeArg *m
 }
 
 // GetCategoryTotal calculates the total sum of transactions for a category with optional date range filter
-func (r *CategoryRepository) GetCategoryTotal(categoryID int, rangeArg *model.RangeInput) (*float64, error) {
+func (r *repository) GetCategoryTotal(categoryID int, rangeArg *model.RangeInput) (*float64, error) {
 	var total float64
 	query := r.db.Model(&model.Transaction{}).Where("category_id = ?", categoryID)
 
@@ -48,7 +49,7 @@ func (r *CategoryRepository) GetCategoryTotal(categoryID int, rangeArg *model.Ra
 }
 
 // GetCategories retrieves all categories with their transactions and totals for a user
-func (r *CategoryRepository) GetCategories(userID string, rangeArg *model.RangeInput) ([]*model.Category, error) {
+func (r *repository) GetCategories(userID string, rangeArg *model.RangeInput) ([]*model.Category, error) {
 	// Query categories (ALL categories)
 	var categories []*model.Category
 	if err := r.db.Find(&categories).Error; err != nil {
@@ -138,7 +139,7 @@ func (r *CategoryRepository) GetCategories(userID string, rangeArg *model.RangeI
 }
 
 // GetCategory retrieves a single category by ID
-func (r *CategoryRepository) GetCategory(id int) (*model.Category, error) {
+func (r *repository) GetCategory(id int) (*model.Category, error) {
 	category := model.Category{}
 
 	if err := r.db.First(&category, id).Error; err != nil {
@@ -148,7 +149,7 @@ func (r *CategoryRepository) GetCategory(id int) (*model.Category, error) {
 }
 
 // GetYears retrieves all distinct years that have transactions for a user
-func (r *CategoryRepository) GetYears(userID string) ([]*int, error) {
+func (r *repository) GetYears(userID string) ([]*int, error) {
 	var years []int
 
 	if err := r.db.Table("distinct_years").

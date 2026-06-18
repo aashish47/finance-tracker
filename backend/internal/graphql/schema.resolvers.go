@@ -16,7 +16,7 @@ import (
 func (r *categoryResolver) Transactions(ctx context.Context, obj *model.Category, rangeArg *model.RangeInput) ([]*model.Transaction, error) {
 	if obj.Transactions == nil {
 		// fmt.Println("Category Transactions: ", time.Now().Format("15:04:05"))
-		transactions, err := r.CategoryRepo.GetCategoryTransactions(obj.ID, rangeArg)
+		transactions, err := r.CategoryService.GetCategoryTransactions(obj.ID, rangeArg)
 		if err != nil {
 			return nil, err
 		}
@@ -29,7 +29,7 @@ func (r *categoryResolver) Transactions(ctx context.Context, obj *model.Category
 func (r *categoryResolver) Total(ctx context.Context, obj *model.Category, rangeArg *model.RangeInput) (*float64, error) {
 	if obj.Total == nil {
 		// fmt.Println("Category Total: ", time.Now().Format("15:04:05"))
-		total, err := r.CategoryRepo.GetCategoryTotal(obj.ID, rangeArg)
+		total, err := r.CategoryService.GetCategoryTotal(obj.ID, rangeArg)
 		if err != nil {
 			return nil, err
 		}
@@ -55,17 +55,17 @@ func (r *mutationResolver) CreateTransaction(ctx context.Context, input model.Tr
 		UserId:     userId,
 	}
 
-	return r.TransactionRepo.CreateTransaction(newTransaction)
+	return r.TransactionService.CreateTransaction(newTransaction)
 }
 
 // UpdateTransaction is the resolver for the updateTransaction field.
 func (r *mutationResolver) UpdateTransaction(ctx context.Context, id int, input model.UpdateTransactionInput) (*model.Transaction, error) {
-	return r.TransactionRepo.UpdateTransaction(id, input)
+	return r.TransactionService.UpdateTransaction(id, input)
 }
 
 // DeleteTransaction is the resolver for the deleteTransaction field.
 func (r *mutationResolver) DeleteTransaction(ctx context.Context, id int) (*model.Transaction, error) {
-	return r.TransactionRepo.DeleteTransaction(id)
+	return r.TransactionService.DeleteTransaction(id)
 }
 
 // Transactions is the resolver for the Transactions field.
@@ -77,7 +77,7 @@ func (r *queryResolver) Transactions(ctx context.Context, rangeArg *model.RangeI
 		return nil, err
 	}
 
-	return r.TransactionRepo.GetTransactions(userId, rangeArg)
+	return r.TransactionService.GetTransactions(userId, rangeArg)
 }
 
 // Transaction is the resolver for the Transaction field.
@@ -87,7 +87,7 @@ func (r *queryResolver) Transaction(ctx context.Context, id int) (*model.Transac
 		return nil, err
 	}
 
-	return r.TransactionRepo.GetTransaction(id, userId)
+	return r.TransactionService.GetTransaction(id, userId)
 }
 
 // GetCategoryTotals is the resolver for the getCategoryTotals field.
@@ -97,7 +97,7 @@ func (r *queryResolver) GetCategoryTotals(ctx context.Context, year int, month *
 		return nil, err
 	}
 
-	return r.TransactionRepo.GetCategoryTotals(userId, year, month, search)
+	return r.TransactionService.GetCategoryTotals(userId, year, month, search)
 }
 
 // GetMonthlyTotals is the resolver for the getMonthlyTotals field.
@@ -107,7 +107,7 @@ func (r *queryResolver) GetMonthlyTotals(ctx context.Context, year int, category
 		return nil, err
 	}
 
-	return r.TransactionRepo.GetMonthlyTotals(userId, year, categoryID, search)
+	return r.TransactionService.GetMonthlyTotals(userId, year, categoryID, search)
 }
 
 // GetTransactionsPaginated is the resolver for the getTransactionsPaginated field.
@@ -117,7 +117,7 @@ func (r *queryResolver) GetTransactionsPaginated(ctx context.Context, year int, 
 		return nil, err
 	}
 
-	return r.TransactionRepo.GetTransactionsPaginated(userId, year, month, categoryID, page, limit, search, sort)
+	return r.TransactionService.GetTransactionsPaginated(userId, year, month, categoryID, page, limit, search, sort)
 }
 
 // Categories is the resolver for the Categories field.
@@ -129,12 +129,12 @@ func (r *queryResolver) Categories(ctx context.Context, rangeArg *model.RangeInp
 		return nil, err
 	}
 
-	return r.CategoryRepo.GetCategories(userId, rangeArg)
+	return r.CategoryService.GetCategories(userId, rangeArg)
 }
 
 // Category is the resolver for the Category field.
 func (r *queryResolver) Category(ctx context.Context, id int, rangeArg *model.RangeInput) (*model.Category, error) {
-	return r.CategoryRepo.GetCategory(id)
+	return r.CategoryService.GetCategory(id)
 }
 
 // Years is the resolver for the Years field.
@@ -146,7 +146,7 @@ func (r *queryResolver) Years(ctx context.Context) ([]*int, error) {
 		return nil, err
 	}
 
-	return r.CategoryRepo.GetYears(userId)
+	return r.CategoryService.GetYears(userId)
 }
 
 // LastDate is the resolver for the LastDate field.
@@ -158,7 +158,7 @@ func (r *queryResolver) LastDate(ctx context.Context) (*string, error) {
 		return nil, err
 	}
 
-	return r.TransactionRepo.GetLastTransactionDate(userId)
+	return r.TransactionService.GetLastTransactionDate(userId)
 }
 
 // Total is the resolver for the Total field.
@@ -170,14 +170,14 @@ func (r *queryResolver) Total(ctx context.Context, rangeArg *model.RangeInput) (
 		return nil, err
 	}
 
-	return r.TransactionRepo.GetTotal(userId, rangeArg)
+	return r.TransactionService.GetTotal(userId, rangeArg)
 }
 
 // Category is the resolver for the category field.
 func (r *transactionResolver) Category(ctx context.Context, obj *model.Transaction) (*model.Category, error) {
 	if obj.Category == nil {
 		// fmt.Println("Transactions Category: ", time.Now().Format("15:04:05"))
-		category, err := r.TransactionRepo.GetCategoryForTransaction(obj.CategoryID)
+		category, err := r.TransactionService.GetCategoryForTransaction(obj.CategoryID)
 		if err != nil {
 			return nil, err
 		}
