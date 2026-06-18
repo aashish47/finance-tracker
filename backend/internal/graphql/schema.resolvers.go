@@ -7,32 +7,19 @@ package graphql
 
 import (
 	"context"
-	"encoding/base64"
-	"fmt"
-	"sort"
-	"time"
 
 	"github.com/aashish47/finance-tracker/backend/internal/graphql/model"
 	"github.com/aashish47/finance-tracker/backend/internal/platform/utils"
-	"gorm.io/gorm"
 )
 
 // Transactions is the resolver for the transactions field.
 func (r *categoryResolver) Transactions(ctx context.Context, obj *model.Category, rangeArg *model.RangeInput) ([]*model.Transaction, error) {
 	if obj.Transactions == nil {
 		// fmt.Println("Category Transactions: ", time.Now().Format("15:04:05"))
-
-		transactions := []*model.Transaction{}
-		query := r.DB.Where("category_id = ?", obj.ID)
-
-		if rangeArg != nil {
-			query.Where("date Between ? AND ?", rangeArg.StartDate, rangeArg.EndDate)
-		}
-
-		if err := query.Preload("Category").Find(&transactions).Error; err != nil {
+		transactions, err := r.CategoryRepo.GetCategoryTransactions(obj.ID, rangeArg)
+		if err != nil {
 			return nil, err
 		}
-
 		obj.Transactions = transactions
 	}
 	return obj.Transactions, nil
@@ -42,19 +29,11 @@ func (r *categoryResolver) Transactions(ctx context.Context, obj *model.Category
 func (r *categoryResolver) Total(ctx context.Context, obj *model.Category, rangeArg *model.RangeInput) (*float64, error) {
 	if obj.Total == nil {
 		// fmt.Println("Category Total: ", time.Now().Format("15:04:05"))
-
-		var total float64
-		query := r.DB.Model(&model.Transaction{}).Where("category_id = ?", obj.ID)
-
-		if rangeArg != nil {
-			query.Where("date Between ? AND ?", rangeArg.StartDate, rangeArg.EndDate)
-		}
-
-		if err := query.Select("COALESCE(SUM(amount), 0)").Scan(&total).Error; err != nil {
+		total, err := r.CategoryRepo.GetCategoryTotal(obj.ID, rangeArg)
+		if err != nil {
 			return nil, err
 		}
-
-		obj.Total = &total
+		obj.Total = total
 	}
 	return obj.Total, nil
 }
@@ -76,58 +55,17 @@ func (r *mutationResolver) CreateTransaction(ctx context.Context, input model.Tr
 		UserId:     userId,
 	}
 
-	if err := r.DB.Create(newTransaction).Error; err != nil {
-		return nil, err
-	}
-
-	return newTransaction, nil
+	return r.TransactionRepo.CreateTransaction(newTransaction)
 }
 
 // UpdateTransaction is the resolver for the updateTransaction field.
 func (r *mutationResolver) UpdateTransaction(ctx context.Context, id int, input model.UpdateTransactionInput) (*model.Transaction, error) {
-	transaction := model.Transaction{}
-
-	if err := r.DB.First(&transaction, id).Error; err != nil {
-		return nil, err
-	}
-
-	if input.CategoryID != nil {
-		transaction.CategoryID = *input.CategoryID
-	}
-
-	if input.Amount != nil {
-		transaction.Amount = *input.Amount
-	}
-	if input.Date != nil {
-		transaction.Date = *input.Date
-	}
-	if input.IsIncome != nil {
-		transaction.IsIncome = *input.IsIncome
-	}
-	if input.Item != nil {
-		transaction.Item = *input.Item
-	}
-
-	if err := r.DB.Save(&transaction).Error; err != nil {
-		return nil, err
-	}
-
-	return &transaction, nil
+	return r.TransactionRepo.UpdateTransaction(id, input)
 }
 
 // DeleteTransaction is the resolver for the deleteTransaction field.
 func (r *mutationResolver) DeleteTransaction(ctx context.Context, id int) (*model.Transaction, error) {
-	transaction := model.Transaction{}
-
-	if err := r.DB.Where("id = ?", id).First(&transaction).Error; err != nil {
-		return nil, err
-	}
-
-	deletedTransaction := transaction
-	if err := r.DB.Delete(&transaction).Error; err != nil {
-		return nil, err
-	}
-	return &deletedTransaction, nil
+	return r.TransactionRepo.DeleteTransaction(id)
 }
 
 // Transactions is the resolver for the Transactions field.
@@ -139,38 +77,7 @@ func (r *queryResolver) Transactions(ctx context.Context, rangeArg *model.RangeI
 		return nil, err
 	}
 
-	transactions := []*model.Transaction{}
-	query := r.DB.Where("user_id = ?", userId)
-
-	if rangeArg != nil {
-		query.Where("date Between ? AND ?", rangeArg.StartDate, rangeArg.EndDate)
-	}
-
-	query = query.Order("date DESC")
-
-	// Modify the preload to include the total for each category, considering the date range
-	// query = query.Preload("Category", func(db *gorm.DB) *gorm.DB {
-	// 	if rangeArg != nil {
-	// 		// If rangeArg is provided, apply date filter to the total subquery
-	// 		return db.Select("id, name, (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE category_id = categories.id AND date >= ? AND date <= ?) AS total", rangeArg.StartDate, rangeArg.EndDate)
-	// 	} else {
-	// 		// If rangeArg is nil, calculate total without date filter
-	// 		return db.Select("id, name, (SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE category_id = categories.id) AS total")
-	// 	}
-	// }).Preload("Category.Transactions", func(db *gorm.DB) *gorm.DB {res
-	// 	if rangeArg != nil {
-	// 		// Apply date filter to the transactions preload for each category
-	// 		return db.Where("date >= ? AND date <= ?", rangeArg.StartDate, rangeArg.EndDate)
-	// 	} else {
-	// 		// Don't apply any date filter if rangeArg is nil
-	// 		return db
-	// 	}
-	// })
-	if err := query.Preload("Category").Find(&transactions).Error; err != nil {
-		return nil, err
-	}
-
-	return transactions, nil
+	return r.TransactionRepo.GetTransactions(userId, rangeArg)
 }
 
 // Transaction is the resolver for the Transaction field.
@@ -180,13 +87,7 @@ func (r *queryResolver) Transaction(ctx context.Context, id int) (*model.Transac
 		return nil, err
 	}
 
-	transaction := model.Transaction{}
-
-	if err := r.DB.Preload("Category").Where("id = ? AND user_id = ?", id, userId).First(&transaction).Error; err != nil {
-		return nil, err
-	}
-
-	return &transaction, nil
+	return r.TransactionRepo.GetTransaction(id, userId)
 }
 
 // GetCategoryTotals is the resolver for the getCategoryTotals field.
@@ -196,37 +97,7 @@ func (r *queryResolver) GetCategoryTotals(ctx context.Context, year int, month *
 		return nil, err
 	}
 
-	// scan into local struct
-	var rows []struct {
-		Category string  `gorm:"column:category"`
-		Total    float64 `gorm:"column:total"`
-		Count    int     `gorm:"column:count"`
-	}
-
-	query := r.DB.Table("transactions").Select("categories.name as category, COALESCE(SUM(transactions.amount),0) as total, COUNT(transactions.id) as count").Joins("LEFT JOIN categories ON categories.id = transactions.category_id").Where("transactions.user_id = ? AND EXTRACT(YEAR FROM transactions.date) = ?", userId, year)
-	if month != nil {
-		query = query.Where("EXTRACT(MONTH FROM transactions.date) = ?", *month)
-	}
-	if search != nil && *search != "" {
-		query = query.Where("transactions.item ILIKE ?", "%"+*search+"%")
-	}
-	query = query.Group("categories.id, categories.name").Order("total DESC")
-
-	if err := query.Scan(&rows).Error; err != nil {
-		return nil, err
-	}
-
-	result := make([]*model.CategoryTotal, 0, len(rows))
-	for _, rrow := range rows {
-		ct := &model.CategoryTotal{
-			Category: rrow.Category,
-			Total:    rrow.Total,
-			Count:    rrow.Count,
-		}
-		result = append(result, ct)
-	}
-
-	return result, nil
+	return r.TransactionRepo.GetCategoryTotals(userId, year, month, search)
 }
 
 // GetMonthlyTotals is the resolver for the getMonthlyTotals field.
@@ -236,41 +107,7 @@ func (r *queryResolver) GetMonthlyTotals(ctx context.Context, year int, category
 		return nil, err
 	}
 
-	var rows []struct {
-		Month int     `gorm:"column:month"`
-		Total float64 `gorm:"column:total"`
-		Count int     `gorm:"column:count"`
-	}
-
-	query := r.DB.Table("transactions").Select("EXTRACT(MONTH FROM date) AS month, COALESCE(SUM(amount),0) AS total, COUNT(id) AS count").Where("user_id = ? AND EXTRACT(YEAR FROM date) = ?", userId, year)
-	if categoryID != nil {
-		query = query.Where("category_id = ?", *categoryID)
-	}
-	if search != nil && *search != "" {
-		query = query.Where("item ILIKE ?", "%"+*search+"%")
-	}
-	query = query.Group("month").Order("month ASC")
-
-	if err := query.Scan(&rows).Error; err != nil {
-		return nil, err
-	}
-
-	// prepare 12 months default
-	monthlyMap := make(map[int]*model.MonthlyTotal)
-	for _, row := range rows {
-		monthlyMap[row.Month] = &model.MonthlyTotal{Month: row.Month, Total: row.Total, Count: row.Count}
-	}
-
-	result := make([]*model.MonthlyTotal, 12)
-	for m := 1; m <= 12; m++ {
-		if v, ok := monthlyMap[m]; ok {
-			result[m-1] = v
-		} else {
-			result[m-1] = &model.MonthlyTotal{Month: m, Total: 0, Count: 0}
-		}
-	}
-
-	return result, nil
+	return r.TransactionRepo.GetMonthlyTotals(userId, year, categoryID, search)
 }
 
 // GetTransactionsPaginated is the resolver for the getTransactionsPaginated field.
@@ -280,80 +117,7 @@ func (r *queryResolver) GetTransactionsPaginated(ctx context.Context, year int, 
 		return nil, err
 	}
 
-	p := 1
-	l := 20
-	if page != nil && *page > 0 {
-		p = *page
-	}
-	if limit != nil && *limit > 0 {
-		l = *limit
-	}
-
-	baseQuery := r.DB.Model(&model.Transaction{}).Where("user_id = ? AND EXTRACT(YEAR FROM date) = ?", userId, year)
-	if month != nil {
-		baseQuery = baseQuery.Where("EXTRACT(MONTH FROM date) = ?", *month)
-	}
-	if categoryID != nil {
-		baseQuery = baseQuery.Where("category_id = ?", *categoryID)
-	}
-	if search != nil && *search != "" {
-		baseQuery = baseQuery.Where("item ILIKE ?", "%"+*search+"%")
-	}
-
-	var totalCount int64
-	if err := baseQuery.Count(&totalCount).Error; err != nil {
-		return nil, err
-	}
-	// --- Dynamic Sorting Logic ---
-	orderClause := "date DESC" // Default
-	if sort != nil {
-		switch *sort {
-		case "date_asc":
-			orderClause = "date ASC"
-		case "date_desc":
-			orderClause = "date DESC"
-		case "amnt_asc":
-			orderClause = "amount ASC"
-		case "amnt_desc":
-			orderClause = "amount DESC"
-		}
-	}
-
-	transactions := []*model.Transaction{}
-	offset := (p - 1) * l
-	if err := baseQuery.Preload("Category").Order(orderClause).Limit(l).Offset(offset).Find(&transactions).Error; err != nil {
-		return nil, err
-	}
-
-	edges := make([]*model.TransactionEdge, 0, len(transactions))
-	for _, t := range transactions {
-		cursorRaw := fmt.Sprintf("%d:%s", t.ID, t.Date)
-		cursor := base64.StdEncoding.EncodeToString([]byte(cursorRaw))
-		edges = append(edges, &model.TransactionEdge{Node: t, Cursor: cursor})
-	}
-
-	var startCursor *string
-	var endCursor *string
-	if len(edges) > 0 {
-		startCursor = &edges[0].Cursor
-		endCursor = &edges[len(edges)-1].Cursor
-	}
-
-	hasNext := int64(offset+len(transactions)) < totalCount
-	hasPrev := p > 1
-
-	conn := &model.TransactionConnection{
-		Edges: edges,
-		PageInfo: &model.PageInfo{
-			HasNextPage:     hasNext,
-			HasPreviousPage: hasPrev,
-			StartCursor:     startCursor,
-			EndCursor:       endCursor,
-		},
-		TotalCount: int(totalCount),
-	}
-
-	return conn, nil
+	return r.TransactionRepo.GetTransactionsPaginated(userId, year, month, categoryID, page, limit, search, sort)
 }
 
 // Categories is the resolver for the Categories field.
@@ -365,108 +129,12 @@ func (r *queryResolver) Categories(ctx context.Context, rangeArg *model.RangeInp
 		return nil, err
 	}
 
-	// Apply date range filter if provided
-	var rangeQuery *gorm.DB
-	if rangeArg != nil {
-		rangeQuery = r.DB.Where("transactions.date Between ? AND ?", rangeArg.StartDate, rangeArg.EndDate)
-	}
-
-	// Query categories (ALL categories)
-	var categories []*model.Category
-	if err := r.DB.Find(&categories).Error; err != nil {
-		return nil, err
-	}
-
-	// Query transactions with totals, joined with categories
-	// Querying all transactions for the user, filtering by range if provided
-	query := r.DB.Table("transactions").
-		Select("transactions.category_id, transactions.id AS transaction_id, transactions.amount, transactions.item, transactions.date, COALESCE(SUM(transactions.amount), 0) AS total").
-		Joins("LEFT JOIN categories ON categories.id = transactions.category_id").
-		Where("transactions.user_id = ?", userId).
-		Group("transactions.category_id, transactions.id")
-
-	// Apply the date range filter for transactions if provided
-	if rangeQuery != nil {
-		query = query.Where("transactions.date Between ? AND ?", rangeArg.StartDate, rangeArg.EndDate)
-	}
-
-	// Execute the query and get transactions with category totals
-	var transactionsWithTotals []struct {
-		CategoryID    int     `gorm:"column:category_id"`
-		TransactionID int     `gorm:"column:transaction_id"`
-		Amount        float64 `gorm:"column:amount"`
-		Item          string  `gorm:"column:item"`
-		Date          string  `gorm:"column:date"`
-		Total         float64 `gorm:"column:total"`
-	}
-
-	if err := query.Scan(&transactionsWithTotals).Error; err != nil {
-		return nil, err
-	}
-
-	// Initialize a map to store categories by their ID
-	categoryMap := make(map[int]*model.Category)
-	// Populate categoryMap with all categories
-	for _, category := range categories {
-		// Set default total to 0 if not already set
-		if category.Total == nil {
-			category.Total = new(float64)
-		}
-		// Ensure transactions is an empty array by default
-		category.Transactions = []*model.Transaction{}
-		categoryMap[category.ID] = category
-	}
-
-	// Map to store transactions for each category
-	for _, data := range transactionsWithTotals {
-		category, exists := categoryMap[data.CategoryID]
-		if !exists {
-			continue // Skip if no such category exists (shouldn't happen with all categories preloaded)
-		}
-
-		// Add the transaction to the category
-		category.Transactions = append(category.Transactions, &model.Transaction{
-			ID:       data.TransactionID,
-			Amount:   data.Amount,
-			Item:     data.Item,
-			Date:     data.Date,
-			Category: category,
-		})
-
-		// Update the total for the category
-		*category.Total += data.Total
-	}
-
-	// Sort transactions by date (or any field you want)
-	for _, category := range categoryMap {
-		sort.Slice(category.Transactions, func(i, j int) bool {
-			// Example sorting by date
-			return category.Transactions[i].Date < category.Transactions[j].Date
-		})
-	}
-
-	// Convert map to slice and sort categories by ID
-	var finalCategories []*model.Category
-	for _, category := range categoryMap {
-		finalCategories = append(finalCategories, category)
-	}
-
-	// Sort categories by ID
-	sort.Slice(finalCategories, func(i, j int) bool {
-		return finalCategories[i].ID < finalCategories[j].ID
-	})
-
-	return finalCategories, nil
+	return r.CategoryRepo.GetCategories(userId, rangeArg)
 }
 
 // Category is the resolver for the Category field.
 func (r *queryResolver) Category(ctx context.Context, id int, rangeArg *model.RangeInput) (*model.Category, error) {
-	category := model.Category{}
-
-	if err := r.DB.First(&category, id).Error; err != nil {
-		return nil, err
-	}
-	return &category, nil
+	return r.CategoryRepo.GetCategory(id)
 }
 
 // Years is the resolver for the Years field.
@@ -478,23 +146,7 @@ func (r *queryResolver) Years(ctx context.Context) ([]*int, error) {
 		return nil, err
 	}
 
-	var years []int
-
-	if err := r.DB.Table("distinct_years").
-		Where("user_id = ?", userId).
-		Select("year").
-		Order("year DESC").
-		Pluck("year", &years).Error; err != nil {
-		return nil, err
-	}
-
-	var result []*int
-	for _, year := range years {
-		yearCopy := year
-		result = append(result, &yearCopy)
-	}
-
-	return result, nil
+	return r.CategoryRepo.GetYears(userId)
 }
 
 // LastDate is the resolver for the LastDate field.
@@ -506,20 +158,7 @@ func (r *queryResolver) LastDate(ctx context.Context) (*string, error) {
 		return nil, err
 	}
 
-	transaction := &model.Transaction{}
-	var lastDate time.Time
-
-	if err := r.DB.Model(&transaction).Where("user_id = ?", userId).Order("date DESC").Limit(1).Pluck("date", &lastDate).Error; err != nil {
-		return nil, err
-	}
-
-	if lastDate.IsZero() {
-		return nil, nil
-	}
-	// fmt.Println("xxxxx:", lastDate.Format(time.RFC3339))
-	formattedDate := lastDate.Format(time.RFC3339)
-
-	return &formattedDate, nil
+	return r.TransactionRepo.GetLastTransactionDate(userId)
 }
 
 // Total is the resolver for the Total field.
@@ -531,30 +170,17 @@ func (r *queryResolver) Total(ctx context.Context, rangeArg *model.RangeInput) (
 		return nil, err
 	}
 
-	var total float64
-	query := r.DB.Model(&model.Transaction{}).Where("user_id = ?", userId)
-
-	if rangeArg != nil {
-		query.Where("date Between ? AND ?", rangeArg.StartDate, rangeArg.EndDate)
-	}
-
-	if err := query.Select("COALESCE(SUM(amount), 0)").Scan(&total).Error; err != nil {
-		return nil, err
-	}
-
-	return &total, nil
+	return r.TransactionRepo.GetTotal(userId, rangeArg)
 }
 
 // Category is the resolver for the category field.
 func (r *transactionResolver) Category(ctx context.Context, obj *model.Transaction) (*model.Category, error) {
 	if obj.Category == nil {
 		// fmt.Println("Transactions Category: ", time.Now().Format("15:04:05"))
-
-		category := &model.Category{}
-		if err := r.DB.First(&category, obj.CategoryID).Error; err != nil {
+		category, err := r.TransactionRepo.GetCategoryForTransaction(obj.CategoryID)
+		if err != nil {
 			return nil, err
 		}
-
 		obj.Category = category
 	}
 	return obj.Category, nil

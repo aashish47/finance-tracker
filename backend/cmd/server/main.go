@@ -9,6 +9,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/aashish47/finance-tracker/backend/internal/database"
 	"github.com/aashish47/finance-tracker/backend/internal/graphql"
+	"github.com/aashish47/finance-tracker/backend/internal/modules/category"
+	"github.com/aashish47/finance-tracker/backend/internal/modules/transaction"
 	"github.com/aashish47/finance-tracker/backend/internal/platform/config"
 	"github.com/aashish47/finance-tracker/backend/internal/platform/middleware"
 	_ "github.com/joho/godotenv/autoload"
@@ -21,7 +23,12 @@ func main() {
 
 	db := database.InitDB(config.LoadDBConfig())
 
-	resolver := graphql.NewResolver(db)
+	// Initialize repositories
+	transactionRepo := transaction.NewTransactionRepository(db)
+	categoryRepo := category.NewCategoryRepository(db)
+
+	// Create resolver with repositories
+	resolver := graphql.NewResolver(transactionRepo, categoryRepo)
 
 	port := os.Getenv("PORT")
 	origin := "https://fintrack-1scr.onrender.com"

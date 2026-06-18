@@ -1,7 +1,8 @@
 package graphql
 
 import (
-	"gorm.io/gorm"
+	"github.com/aashish47/finance-tracker/backend/internal/modules/category"
+	"github.com/aashish47/finance-tracker/backend/internal/modules/transaction"
 )
 
 //go:generate go run github.com/99designs/gqlgen generate
@@ -10,11 +11,13 @@ import (
 // It serves as dependency injection for your app, add any dependencies you require here.
 
 type Resolver struct {
-	DB *gorm.DB
+	TransactionRepo *transaction.TransactionRepository
+	CategoryRepo    *category.CategoryRepository
 }
 
-func NewResolver(db *gorm.DB) *Resolver {
+func NewResolver(transactionRepo *transaction.TransactionRepository, categoryRepo *category.CategoryRepository) *Resolver {
 	return &Resolver{
-		DB: db,
+		TransactionRepo: transactionRepo,
+		CategoryRepo:    categoryRepo,
 	}
 }
