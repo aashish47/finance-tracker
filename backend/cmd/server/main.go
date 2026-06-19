@@ -57,7 +57,7 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	if port == defaultPort {
+	if env == "development" {
 		mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		log.Println("GraphQL Playground enabled at http://localhost:" + port)
 	} else {
