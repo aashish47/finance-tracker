@@ -35,7 +35,7 @@ func main() {
 	resolver := graphql.NewResolver(transactionService, categoryService)
 
 	port := os.Getenv("PORT")
-	origin := "https://fintrack-1scr.onrender.com"
+	origin := "https://fintrack47.vercel.app"
 	if port == "" {
 		port = defaultPort
 		origin = "http://localhost:3000"
@@ -52,11 +52,19 @@ func main() {
 		AllowCredentials: true,
 	}).Handler(authMiddleware)
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	// http.Handle("/query", corsHandler)
+	mux := http.NewServeMux()
 
-	http.Handle("/query", corsHandler)
+	if port == defaultPort {
+		mux.Handle("/", playground.Handler("GraphQL playground", "/query"))
+		log.Println("GraphQL Playground enabled at http://localhost:" + port)
+	} else {
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Not Found"))
+		})
+	}
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	mux.Handle("/query", corsHandler)
+
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
