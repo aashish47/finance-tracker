@@ -1,4 +1,4 @@
-"use cache";
+"use cache: private";
 
 import { cacheTag } from "next/cache";
 import { cache } from "react";
