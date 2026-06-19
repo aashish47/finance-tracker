@@ -20,6 +20,18 @@ import (
 const defaultPort = "8080"
 
 func main() {
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "development"
+	}
+
+	port := os.Getenv("PORT")
+	origin := "https://fintrack47.vercel.app"
+
+	if env == "development" {
+		port = defaultPort
+		origin = "http://localhost:3000"
+	}
 
 	db := database.InitDB(config.LoadDBConfig())
 
@@ -31,16 +43,7 @@ func main() {
 	transactionService := transaction.NewService(transactionRepo)
 	categoryService := category.NewService(categoryRepo)
 
-	// Create resolver with services
 	resolver := graphql.NewResolver(transactionService, categoryService)
-
-	port := os.Getenv("PORT")
-	origin := "https://fintrack47.vercel.app"
-	if port == "" {
-		port = defaultPort
-		origin = "http://localhost:3000"
-	}
-
 	srv := handler.NewDefaultServer(graphql.NewExecutableSchema(graphql.Config{Resolvers: resolver}))
 
 	// Enable CORS
