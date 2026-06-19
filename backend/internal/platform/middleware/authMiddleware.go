@@ -97,22 +97,22 @@ func getOperationName(r *http.Request) string {
 }
 
 func printRequestStats(start time.Time, path string, opName string) {
-	if os.Getenv("PORT") == "" {
-		// time.Since calculates the TRUE duration at this exact moment
-		log.Printf("[GQL] %s | Op: %s | Duration: %v", path, opName, time.Since(start))
-	}
+	// if os.Getenv("APP_ENV") == "development" {
+	// time.Since calculates the TRUE duration at this exact moment
+	log.Printf("[GQL] %s | Op: %s | Duration: %v", path, opName, time.Since(start))
+	// }
 }
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Only initialize logging logic if in Dev (PORT == "")
-		if os.Getenv("PORT") == "" {
-			start := time.Now()
-			// Capture name and restore body immediately
-			opName := getOperationName(r)
-			// Defer the print to run after next.ServeHTTP
-			defer printRequestStats(start, r.URL.Path, opName)
-		}
+		// if os.Getenv("APP_ENV") == "development" {
+		start := time.Now()
+		// Capture name and restore body immediately
+		opName := getOperationName(r)
+		// Defer the print to run after next.ServeHTTP
+		defer printRequestStats(start, r.URL.Path, opName)
+		// }
 
 		authorizationHeader := r.Header.Get("Authorization")
 		token := strings.TrimPrefix(authorizationHeader, "Bearer ")
