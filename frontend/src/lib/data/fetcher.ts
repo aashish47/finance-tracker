@@ -1,5 +1,18 @@
 import { jwtVerify } from "jose";
 import { cacheTag } from "next/cache";
+import { cache } from "react";
+
+const getUserIdFromToken = cache(
+	async (accessToken: string): Promise<string> => {
+		try {
+			const secret = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
+			const { payload } = await jwtVerify(accessToken, secret);
+			return payload.sub as string;
+		} catch {
+			throw new Error("Unauthorized token");
+		}
+	},
+);
 
 export const fetcher = async <T>(
 	query: string,
@@ -11,14 +24,7 @@ export const fetcher = async <T>(
 		throw new Error("missing access token");
 	}
 
-	let userId: string;
-	try {
-		const secret = new TextEncoder().encode(process.env.JWT_SECRET_KEY);
-		const { payload } = await jwtVerify(accessToken, secret);
-		userId = payload.sub as string;
-	} catch {
-		throw new Error("Unauthorized token");
-	}
+	const userId = await getUserIdFromToken(accessToken);
 
 	const getCachedData = async (
 		q: string,
