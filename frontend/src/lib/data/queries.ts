@@ -18,102 +18,94 @@ import {
 	GetYearsDocument,
 	GetYearsQuery,
 } from "@/graphql/generated/graphql";
+import { getUser } from "@/lib/auth";
 import { fetcher } from "@/lib/data/fetcher";
 import { dateTag, lastDateTag, yearsTag, yearTag } from "@/lib/data/tags";
-import { FetchOptions } from "@/types/types";
 
-export const getCategoriesList = async (params: FetchOptions) => {
-	const { accessToken, cacheKey } = params;
+export const getCategoriesList = async () => {
 	const { Categories } = await fetcher<GetCategoriesQuery>(
 		GetCategoriesDocument.toString(),
 		undefined,
-		cacheKey,
-		accessToken,
+		undefined,
 	);
 	return Categories ? Categories.filter((c) => c !== null) : [];
 };
 
 export const getCategoryTotals = async (
-	params: GetCategoryTotalsQueryVariables & FetchOptions,
+	variables: GetCategoryTotalsQueryVariables,
 ) => {
-	const { userId, accessToken, cacheKey, ...variables } = params;
+	const { id } = await getUser();
 	const { year } = variables;
-	const key = cacheKey ?? yearTag(userId, year);
+	const key = yearTag(id, year);
 	const { GetCategoryTotals } = await fetcher<GetCategoryTotalsQuery>(
 		GetCategoryTotalsDocument.toString(),
 		variables,
 		key,
-		accessToken,
 	);
 	return GetCategoryTotals;
 };
-export const getDaysData = async (params: { date: string } & FetchOptions) => {
-	const { date, userId, accessToken, cacheKey } = params;
+export const getDaysData = async (date: string) => {
+	const { id } = await getUser();
 	const variables: GetDaysDataQueryVariables = {
 		range: { startDate: date, endDate: date },
 	};
-	const key = cacheKey ?? dateTag(userId, date);
+	const key = dateTag(id, date);
 	const { Transactions, Total }: GetDaysDataQuery = await fetcher(
 		GetDaysDataDocument.toString(),
 		variables,
 		key,
-		accessToken,
 	);
 	return { Transactions, Total };
 };
 
-export const getLastDate = async (params: FetchOptions) => {
-	const { accessToken, cacheKey, userId } = params;
-	const key = cacheKey ?? lastDateTag(userId);
+export const getLastDate = async () => {
+	const { id } = await getUser();
+	const key = lastDateTag(id);
 	const { LastDate }: GetLastDateQuery = await fetcher(
 		GetLastDateDocument.toString(),
 		undefined,
 		key,
-		accessToken,
 	);
 
 	return LastDate;
 };
 
 export const getMonthlyTotals = async (
-	params: GetMonthlyTotalsQueryVariables & FetchOptions,
+	variables: GetMonthlyTotalsQueryVariables,
 ) => {
-	const { userId, accessToken, cacheKey, ...variables } = params;
+	const { id } = await getUser();
 	const { year } = variables;
-	const key = cacheKey ?? yearTag(userId, year);
+	const key = yearTag(id, year);
 	const { GetMonthlyTotals } = await fetcher<GetMonthlyTotalsQuery>(
 		GetMonthlyTotalsDocument.toString(),
 		variables,
 		key,
-		accessToken,
 	);
 	return GetMonthlyTotals;
 };
 
 export const getTransactionsPaginated = async (
-	params: GetTransactionsPaginatedQueryVariables & FetchOptions,
+	variables: GetTransactionsPaginatedQueryVariables,
 ) => {
-	const { cacheKey, userId, accessToken, ...variables } = params;
+	const { id } = await getUser();
 	const { year } = variables;
-	const key = cacheKey ?? yearTag(userId, year);
+	const key = yearTag(id, year);
 	const { GetTransactionsPaginated } =
 		await fetcher<GetTransactionsPaginatedQuery>(
 			GetTransactionsPaginatedDocument.toString(),
 			variables,
 			key,
-			accessToken,
 		);
 	return GetTransactionsPaginated;
 };
 
-export const getYearsList = async (params: FetchOptions) => {
-	const { accessToken, cacheKey, userId } = params;
-	const key = cacheKey ?? yearsTag(userId);
+export const getYearsList = async () => {
+	const { id } = await getUser();
+	const key = yearsTag(id);
 	const { Years } = await fetcher<GetYearsQuery>(
 		GetYearsDocument.toString(),
 		undefined,
 		key,
-		accessToken,
 	);
 	return Years;
 };

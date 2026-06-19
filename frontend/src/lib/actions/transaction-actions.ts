@@ -10,7 +10,7 @@ import {
 	UpdateTransactionMutation,
 	UpdateTransactionMutationVariables,
 } from "@/graphql/generated/graphql";
-import { getSession, getUser } from "@/lib/auth";
+import { getUser } from "@/lib/auth";
 import { fetcher } from "@/lib/data/fetcher";
 import { dateTag, lastDateTag, yearsTag, yearTag } from "@/lib/data/tags";
 import { format } from "date-fns";
@@ -19,13 +19,7 @@ import { updateTag } from "next/cache";
 export const createTransaction = async (
 	variables: CreateTransactionMutationVariables,
 ) => {
-	const { access_token } = await getSession();
-	await fetcher(
-		CreateTransactionDocument.toString(),
-		variables,
-		undefined,
-		access_token,
-	);
+	await fetcher(CreateTransactionDocument.toString(), variables);
 
 	const {
 		input: { date },
@@ -42,12 +36,9 @@ export const updateTransactions = async (
 	variables: UpdateTransactionMutationVariables,
 	oldDate: string,
 ) => {
-	const { access_token } = await getSession();
 	const { updateTransaction }: UpdateTransactionMutation = await fetcher(
 		UpdateTransactionDocument.toString(),
 		variables,
-		undefined,
-		access_token,
 	);
 
 	const date = updateTransaction ? updateTransaction?.date : "";
@@ -67,12 +58,9 @@ export const updateTransactions = async (
 export const deleteTransaction = async (
 	variables: DeleteTransactionMutationVariables,
 ) => {
-	const { access_token } = await getSession();
 	const { deleteTransaction }: DeleteTransactionMutation = await fetcher(
 		DeleteTransactionDocument.toString(),
 		variables,
-		undefined,
-		access_token,
 	);
 
 	const date = deleteTransaction ? deleteTransaction.date : "";

@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 type SearchParam = string | string[] | undefined;
 
 const parseYear = (year: SearchParam) => {
@@ -45,7 +47,7 @@ const parseSort = (sort: SearchParam) => {
 		: undefined;
 };
 
-const parseSearchParams = (searchParams: Record<string, SearchParam>) => {
+const parseSearchParams = cache((searchParams: Record<string, SearchParam>) => {
 	const { year, month, category, date, page, limit, search, sort } =
 		searchParams;
 	return {
@@ -58,6 +60,6 @@ const parseSearchParams = (searchParams: Record<string, SearchParam>) => {
 		search: parseSearch(search),
 		sort: parseSort(sort),
 	};
-};
+});
 
 export default parseSearchParams;

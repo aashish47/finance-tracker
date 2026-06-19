@@ -1,8 +1,8 @@
 import Navbar from "@/components/dashboard/Navbar";
-import { getSession, getUser } from "@/lib/auth";
+import { getUser } from "@/lib/auth";
 import { parseSearchParamsWithDefaults } from "@/lib/data/parseSearchParamsHelper";
 import { getCategoriesList, getYearsList } from "@/lib/data/queries";
-import { SearchParamsType, UrlFetchProps } from "@/types/types";
+import { SearchParamsType } from "@/types/types";
 import React, { Suspense } from "react";
 
 interface NavbarProps {
@@ -13,24 +13,20 @@ const NavbarContent: React.FC<SearchParamsType & NavbarProps> = async ({
 	dataTable,
 	searchParams,
 }) => {
-	const [user, session] = await Promise.all([getUser(), getSession()]);
-	const fetchOptions = { userId: user.id, accessToken: session.access_token };
+	const [user_metadata, urlProps, years, categories] = await Promise.all([
+		getUser(),
+		parseSearchParamsWithDefaults(searchParams),
+		getYearsList(),
+		getCategoriesList(),
+	]);
 
-	const urlProps = await parseSearchParamsWithDefaults(
-		searchParams,
-		fetchOptions,
-	);
-
-	const urlFetchProps: UrlFetchProps = { ...urlProps, ...fetchOptions };
-	const years = await getYearsList({ ...urlFetchProps });
-	const categories = await getCategoriesList(urlFetchProps);
 	return (
 		<Navbar
 			years={years}
 			categories={categories}
-			user_metadata={user.user_metadata}
+			user_metadata={user_metadata}
 			dataTable={dataTable}
-			{...urlFetchProps}
+			{...urlProps}
 		/>
 	);
 };

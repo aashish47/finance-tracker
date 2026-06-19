@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
-export const getSession = async () => {
+export const getSession = cache(async () => {
 	const supabase = await createClient();
 	const {
 		data: { session },
@@ -10,9 +11,9 @@ export const getSession = async () => {
 		redirect("/login");
 	}
 	return session;
-};
+});
 
-export const getUser = async () => {
+export const getUser = cache(async () => {
 	const supabase = await createClient();
 	const {
 		data: { user },
@@ -21,4 +22,4 @@ export const getUser = async () => {
 		redirect("/login");
 	}
 	return user;
-};
+});

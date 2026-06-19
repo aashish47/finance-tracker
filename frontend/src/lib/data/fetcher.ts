@@ -1,3 +1,4 @@
+import { getSession } from "@/lib/auth";
 import { jwtVerify } from "jose";
 import { cacheTag } from "next/cache";
 import { cache } from "react";
@@ -18,13 +19,13 @@ export const fetcher = async <T>(
 	query: string,
 	variables?: unknown,
 	cacheKey?: string,
-	accessToken?: string,
 ): Promise<T> => {
-	if (!accessToken) {
+	const { access_token } = await getSession();
+	if (!access_token) {
 		throw new Error("missing access token");
 	}
 
-	const userId = await getUserIdFromToken(accessToken);
+	const userID = await getUserIdFromToken(access_token);
 
 	const getCachedData = async (
 		q: string,
@@ -42,7 +43,7 @@ export const fetcher = async <T>(
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				Authorization: `Bearer ${accessToken}`,
+				Authorization: `Bearer ${access_token}`,
 			},
 			body: JSON.stringify({ query: q, variables: v }),
 		});
@@ -59,5 +60,5 @@ export const fetcher = async <T>(
 		return json.data;
 	};
 
-	return getCachedData(query, variables, userId);
+	return getCachedData(query, variables, userID);
 };

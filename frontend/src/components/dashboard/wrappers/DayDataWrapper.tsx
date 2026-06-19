@@ -1,38 +1,25 @@
 import DayData from "@/components/dashboard/DayData";
-import { getSession, getUser } from "@/lib/auth";
 import { parseSearchParamsWithDefaults } from "@/lib/data/parseSearchParamsHelper";
 import { getDaysData } from "@/lib/data/queries";
-import { SearchParamsType, UrlFetchProps } from "@/types/types";
+import { SearchParamsType } from "@/types/types";
 import { format } from "date-fns";
 import { Suspense } from "react";
 
 const DayDataContent: React.FC<SearchParamsType> = async ({ searchParams }) => {
-	const [user, session] = await Promise.all([getUser(), getSession()]);
-	const fetchOptions = { userId: user.id, accessToken: session.access_token };
+	const urlProps = await parseSearchParamsWithDefaults(searchParams);
+	const { date } = urlProps;
 
-	const urlProps = await parseSearchParamsWithDefaults(
-		searchParams,
-		fetchOptions,
-	);
-
-	const urlFetchProps: UrlFetchProps = { ...urlProps, ...fetchOptions };
-
-	const { date, ...rest } = urlFetchProps;
-
-	const daysData = await getDaysData({
-		date: date
+	const { Total, Transactions } = await getDaysData(
+		date
 			? format(new Date(date), "yyyy-MM-dd")
 			: format(new Date(), "yyyy-MM-dd"),
-		...rest,
-	});
-
-	const { Total: dailyTotal, Transactions: dailyTransactions } = daysData;
+	);
 
 	return (
 		<DayData
-			dailyTotal={dailyTotal}
-			dailyTransactions={dailyTransactions}
-			{...urlFetchProps}
+			dailyTotal={Total}
+			dailyTransactions={Transactions}
+			{...urlProps}
 		/>
 	);
 };
